@@ -1,6 +1,6 @@
 # Lambdalf -- Clojure support for Alfresco
 
-<img src="https://raw.githubusercontent.com/lambdalf/lambdalf/gh-pages/images/logo.png"
+<img src="https://raw.githubusercontent.com/lambdalf/lambdalf/gh-pages/images/logo-small.png"
  alt="Lambdalf logo" title="Two logos at the price of one!" align="right" />
 
 This library adds [Clojure](http://www.clojure.org/) support to the open source
