@@ -1,11 +1,7 @@
 # Lambdalf -- Clojure support for Alfresco
 
-----
-
-This is a substantial fork of Carlo Sciolla's [lambdalf](http://github.com/skuro/lambdalf) project.  The primary difference
-is that this version replaces Maven with Leiningen as the build tool, thereby substantially simplifying the project.
-
-----
+<img src="https://raw.githubusercontent.com/lambdalf/lambdalf/gh-pages/images/logo.png"
+ alt="Lambdalf logo" title="Two logos at the price of one!" align="right" />
 
 This library adds [Clojure](http://www.clojure.org/) support to the open source
 [Alfresco Content Management System](http://www.alfresco.com/). Specifically, it:
