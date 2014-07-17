@@ -32,10 +32,9 @@
   :dependencies [
                   [org.clojure/clojure     "1.6.0"]
                   [org.clojure/tools.nrepl "0.2.3"]
-
-                  [clj-http "0.9.2" :scope "test"]
+                  [clj-http                "0.9.2" :scope "test"]
                 ]
-  :profiles {:dev      { :plugins [[lein-amp "0.1.0"]] }
+  :profiles {:dev      { :plugins [[lein-amp "0.2.0"]] }
              :uberjar  { :aot :all }
              :provided { :dependencies [
                                          [org.alfresco/alfresco-core                            ~alfresco-version :scope "runtime"]
@@ -51,5 +50,6 @@
   :source-paths      ["src/clojure"]
   :java-source-paths ["src/java"]
   :resource-paths    ["src/resource"]
-  :javac-target      "1.6"
+  :amp-source-path   "src/amp"
+  :javac-target      "1.7"
   )

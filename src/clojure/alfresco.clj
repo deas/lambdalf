@@ -17,37 +17,37 @@
   (:require [clojure.tools.nrepl.server :as nrepl]))
 
 ; Hold a reference to the NREPL server
-(def ^:private *nrepl-server* (atom nil))
+(def ^:private nrepl-server (atom nil))
 
 (defn nrepl-running?
   "Is the nREPL server running?"
-  ([] (nrepl-running? @*nrepl-server*))
-  ([nrepl-server]
-    (not (nil? nrepl-server))))
+  ([] (nrepl-running? @nrepl-server))
+  ([the-server]
+    (not (nil? the-server))))
 
 (defn stop-nrepl!
   "Stops the nREPL server. Returns nil."
-  ([] (stop-nrepl! @*nrepl-server*))
-  ([nrepl-server]
-    (if (nrepl-running?)
-      (nrepl/stop-server nrepl-server))
-    (reset! *nrepl-server* nil)
+  ([] (stop-nrepl! @nrepl-server))
+  ([the-server]
+    (if (nrepl-running? the-server)
+      (nrepl/stop-server the-server))
+    (reset! nrepl-server nil)
     nil))
 
 (defn- restart-nrepl!
   "Restarts (stops if necessary, then starts) an nREPL server on the given port, returning the server object.
    Intended to be called by clojure.core/swap!."
-  ([nrepl-server] (restart-nrepl! nrepl-server 7888))
-  ([nrepl-server port]
-    (if (nrepl-running? nrepl-server)
-      (stop-nrepl! nrepl-server))
+  ([the-server] (restart-nrepl! the-server 7888))
+  ([the-server port]
+    (if (nrepl-running? the-server)
+      (stop-nrepl! the-server))
     (nrepl/start-server :port port)))
 
 (defn start-nrepl!
   "Starts up an nREPL server, returning the port it's running on."
   ([] (start-nrepl! 7888))
   ([port]
-    (swap! *nrepl-server* restart-nrepl! port)
+    (swap! nrepl-server restart-nrepl! port)
     port))
 
 ; Other Clojure gobbledygook
