@@ -34,7 +34,7 @@
                   [org.clojure/tools.nrepl "0.2.3"]
                   [clj-http                "0.9.2" :scope "test"]
                 ]
-  :profiles {:dev      { :plugins [[lein-amp "0.2.0"]] }
+  :profiles {:dev      { :plugins [[lein-amp "0.3.0"]] }
              :uberjar  { :aot :all }
              :provided { :dependencies [
                                          [org.alfresco/alfresco-core                            ~alfresco-version :scope "runtime"]
