@@ -14,8 +14,9 @@
 ; limitations under the License.
 
 (ns alfresco.filefolder
-  (:require [alfresco.core :as c]
-            [alfresco.auth :as a])
+  (:require [clojure.string :as s]
+            [alfresco.core  :as c]
+            [alfresco.nodes :as n])
   (:import [org.alfresco.service.cmr.model FileFolderService
                                            FileInfo]
            [org.alfresco.model ContentModel]))
@@ -55,3 +56,28 @@
   [source-node target-parent new-name]
   { :pre (exist? [source-node target-parent]) }
   (.getNodeRef (.copy (file-folder-service) source-node target-parent new-name)))
+
+; N00B WARNING: Don't yet know how to express this inline as an anonymous fn...
+(defn- first-sequential?
+  [& args]
+  (sequential? (first args)))
+
+(defmulti find-by-path
+  "Finds a node at the given path location, optionally providing a start-node (defaults to Company Home).
+  Returns nil if the path does not identify a node."
+  first-sequential?)
+
+(defmethod find-by-path true
+  ([path-elems] (find-by-path path-elems (n/company-home)))
+  ([path-elems start-node]
+    (let [file-info (.resolveNamePath (file-folder-service) start-node path-elems false)]
+      (if (nil? file-info)
+        nil
+        (.getNodeRef file-info)))))
+
+; This version of the multi-method converts the incoming path to a string, then splits it on "/". Naive, but useful...
+(defmethod find-by-path false
+  ([path] (find-by-path path (n/company-home)))
+  ([path start-node]
+    (find-by-path (filter #(< 0 (.length %)) (s/split (str path) #"/")) start-node)))
+
