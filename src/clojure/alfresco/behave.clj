@@ -39,3 +39,7 @@ QName qname. The provided form f must accept two input parameters: a noderef and
                          NodeServicePolicies$OnAddAspectPolicy/QNAME
                          (m/qname ~qname)
                          b#)))
+
+; ####TODO: add macros for other policy types and notification frequencies
+; OR (better)
+; provide a generic macro that can handle all possible policy types and notification frequencies
