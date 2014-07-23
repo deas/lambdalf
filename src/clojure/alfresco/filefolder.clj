@@ -31,7 +31,7 @@
   [node]
   (.exists (file-folder-service) node))
 
-(defn exist?
+(defn all-exist?
   "Do all of the given nodes exist?"
   [nodes]
   (every? true? (map #(exists? %) nodes)))
@@ -54,22 +54,18 @@
 (defn copy!
   "Copies a node from one place to another. Returns the nodeRef of the newly created node."
   [source-node target-parent new-name]
-  { :pre (exist? [source-node target-parent]) }
+  { :pre (all-exist? [source-node target-parent]) }
   (.getNodeRef (.copy (file-folder-service) source-node target-parent new-name)))
-
-; N00B WARNING: Don't yet know how to express this inline as an anonymous fn...
-(defn- first-sequential?
-  [& args]
-  (sequential? (first args)))
 
 (defmulti find-by-path
   "Finds a node at the given path location, optionally providing a start-node (defaults to Company Home).
   Returns nil if the path does not identify a node."
-  first-sequential?)
+  #(sequential? (first %&)))
 
 (defmethod find-by-path true
   ([path-elems] (find-by-path path-elems (n/company-home)))
   ([path-elems start-node]
+    { :pre (exists? start-node) }
     (let [file-info (.resolveNamePath (file-folder-service) start-node path-elems false)]
       (if (nil? file-info)
         nil
