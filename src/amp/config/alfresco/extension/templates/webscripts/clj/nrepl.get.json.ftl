@@ -1,2 +1,3 @@
 [#ftl]
-{ "status" : "${status}" }
+{ "status" : "${status}"[#if port??],
+  "port"   : "${port?c}"[/#if] }
