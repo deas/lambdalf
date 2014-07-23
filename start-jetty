@@ -13,23 +13,8 @@ function artifact-file(){
     ARTIFACT=$REPO/${GID//.//}/$AID/$VID/$AID-$VID.jar
 }
 
-function ensure-dependency(){
-    AID=$1
-    GID=$2
-    VID=$3
-
-    artifact-file $AID $GID $VID
-    if [ ! -f $ARTIFACT ]
-    then
-        echo "$GID/$AID v$VID is missing, downloading"
-        mvn dependency:get -DartifactId=$AID -DgroupId=$GID -Dversion=$VID -DrepoUrl=http://repo1.maven.org/maven2 > /dev/null
-    fi
-}
-
 function run-war(){
-    ensure-dependency h2-support tk.skuro.alfresco 1.6
-    ensure-dependency jetty-runner org.eclipse.jetty 9.2.1.v20140609
-
+    artifact-file jetty-runner org.eclipse.jetty 9.2.1.v20140609
     JETTY_RUNNER=$ARTIFACT
     echo "Running Jetty"
     java -jar $JETTY_RUNNER $@

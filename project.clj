@@ -32,7 +32,10 @@
   :dependencies [
                   [org.clojure/clojure     "1.6.0"]
                   [org.clojure/tools.nrepl "0.2.3"]
-                  [clj-http                "0.9.2" :scope "test"]
+                  [clj-http                       "0.9.2"           :scope "test"]
+                  [tk.skuro.alfresco/h2-support   "1.6"             :scope "test"]
+                  [com.h2database/h2              "1.3.174"         :scope "test"]
+                  [org.eclipse.jetty/jetty-runner "9.2.1.v20140609" :scope "test"]
                 ]
   :profiles {:dev      { :plugins [[lein-amp "0.3.0"]] }
              :uberjar  { :aot :all }
