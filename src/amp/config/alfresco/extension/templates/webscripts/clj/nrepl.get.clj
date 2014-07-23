@@ -7,6 +7,13 @@
   []
   WebScript
   (run [this in out model]
-    (w/return model {:status (if (a/nrepl-running?) "Started" "Stopped")})))
+    (w/return model (if (a/nrepl-running?)
+
+                      ; started
+                      {:status "Started"
+                       :port   (a/nrepl-port)}
+
+                      ; not started
+                      {:status "Stopped"}))))
 
 (NreplStatusWebScript.)

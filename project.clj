@@ -51,5 +51,6 @@
   :java-source-paths ["src/java"]
   :resource-paths    ["src/resource"]
   :amp-source-path   "src/amp"
+  :amp-target-war    [org.alfresco/alfresco "4.2.c" :extension "war"]
   :javac-target      "1.7"
   )

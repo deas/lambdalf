@@ -25,6 +25,11 @@
   ([the-server]
     (not (nil? the-server))))
 
+(defn nrepl-port
+  "Returns the port number that NREPL is listening to"
+  ([] (nrepl-port @nrepl-server))
+  ([server] (:port server)))
+
 (defn stop-nrepl!
   "Stops the nREPL server. Returns nil."
   ([] (stop-nrepl! @nrepl-server))
