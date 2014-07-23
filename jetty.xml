@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+
+<Configure class="org.eclipse.jetty.server.Server">
+
+    <New id="myDataSource"
+         class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg></Arg>
+        <Arg>jdbc/dataSource</Arg>
+        <Arg>
+            <New class="org.h2.jdbcx.JdbcDataSource">
+                <Set name="URL">jdbc:h2:target/h2_data/lambdalf;MVCC=true</Set>
+                <Set name="User">alfresco</Set>
+                <Set name="Password">alfresco</Set>
+            </New>
+        </Arg>
+    </New>
+
+    <Call name="addBean">
+        <Arg>
+            <New class="org.eclipse.jetty.security.HashLoginService">
+                <Set name="name">Repository</Set>
+                <Set name="config">realm.properties</Set>
+                <Set name="refreshInterval">0</Set>
+                <Call name="putUser">
+                    <Arg>alfresco</Arg>
+                    <Arg>
+                        <New class="org.eclipse.jetty.util.security.Password">
+                            <Arg>alfresco</Arg>
+                        </New>
+                    </Arg>
+                    <Arg></Arg>
+                </Call>
+            </New>
+        </Arg>
+    </Call>
+
+</Configure>
