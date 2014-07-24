@@ -32,28 +32,33 @@
   :dependencies [
                   [org.clojure/clojure     "1.6.0"]
                   [org.clojure/tools.nrepl "0.2.3"]
-                  [clj-http                       "0.9.2"           :scope "test"]
-                  [tk.skuro.alfresco/h2-support   "1.6"             :scope "test"]
-                  [com.h2database/h2              "1.3.174"         :scope "test"]
-                  [org.eclipse.jetty/jetty-runner "9.2.1.v20140609" :scope "test"]
+                  ; WARNING: do _not_ add test, provided or runtime dependencies here as they will be included in the uberjar,
+                  ; regardless of scope.  See https://github.com/technomancy/leiningen/issues/741 for an explanation of why
+                  ; this occurs.
                 ]
   :profiles {:dev      { :plugins [[lein-amp "0.3.0"]] }
              :uberjar  { :aot :all }
+             :test     { :dependencies [
+                                         [clj-http                       "0.9.2"           :scope "test"]
+                                         [tk.skuro.alfresco/h2-support   "1.6"             :scope "test"]
+                                         [com.h2database/h2              "1.3.174"         :scope "test"]
+                                         [org.eclipse.jetty/jetty-runner "9.2.1.v20140609" :scope "test"]
+                                       ] }
              :provided { :dependencies [
-                                         [org.alfresco/alfresco-core                            ~alfresco-version :scope "runtime"]
-                                         [org.alfresco/alfresco-data-model                      ~alfresco-version :scope "runtime"]
-                                         [org.alfresco/alfresco-mbeans                          ~alfresco-version :scope "runtime"]
-                                         [org.alfresco/alfresco-remote-api                      ~alfresco-version :scope "runtime"]
-                                         [org.alfresco/alfresco-repository                      ~alfresco-version :scope "runtime"]
-                                         [org.springframework/spring-context                    "3.0.5.RELEASE"   :scope "runtime"]
-                                         [org.springframework/spring-beans                      "3.0.5.RELEASE"   :scope "runtime"]
-                                         [org.springframework.extensions.surf/spring-webscripts "1.2.0"           :scope "runtime"]
+                                         [org.alfresco/alfresco-core                            ~alfresco-version :scope "provided"]
+                                         [org.alfresco/alfresco-data-model                      ~alfresco-version :scope "provided"]
+                                         [org.alfresco/alfresco-mbeans                          ~alfresco-version :scope "provided"]
+                                         [org.alfresco/alfresco-remote-api                      ~alfresco-version :scope "provided"]
+                                         [org.alfresco/alfresco-repository                      ~alfresco-version :scope "provided"]
+                                         [org.springframework/spring-context                    "3.0.5.RELEASE"   :scope "provided"]
+                                         [org.springframework/spring-beans                      "3.0.5.RELEASE"   :scope "provided"]
+                                         [org.springframework.extensions.surf/spring-webscripts "1.2.0"           :scope "provided"]
                                        ] }
             }
   :source-paths      ["src/clojure"]
   :java-source-paths ["src/java"]
   :resource-paths    ["src/resource"]
   :amp-source-path   "src/amp"
-  :amp-target-war    [org.alfresco/alfresco "4.2.c" :extension "war"]
+  :amp-target-war    [org.alfresco/alfresco alfresco-version :extension "war"]
   :javac-target      "1.7"
   )
