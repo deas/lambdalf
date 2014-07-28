@@ -45,11 +45,11 @@
                                          [org.eclipse.jetty/jetty-runner "9.2.1.v20140609" :scope "test"]
                                        ] }
              :provided { :dependencies [
-                                         [org.alfresco/alfresco-core                            alfresco-version :scope "provided"]
-                                         [org.alfresco/alfresco-data-model                      alfresco-version :scope "provided"]
-                                         [org.alfresco/alfresco-mbeans                          alfresco-version :scope "provided"]
-                                         [org.alfresco/alfresco-remote-api                      alfresco-version :scope "provided"]
-                                         [org.alfresco/alfresco-repository                      alfresco-version :scope "provided"]
+                                         [org.alfresco/alfresco-core                            ~alfresco-version :scope "provided"]
+                                         [org.alfresco/alfresco-data-model                      ~alfresco-version :scope "provided"]
+                                         [org.alfresco/alfresco-mbeans                          ~alfresco-version :scope "provided"]
+                                         [org.alfresco/alfresco-remote-api                      ~alfresco-version :scope "provided"]
+                                         [org.alfresco/alfresco-repository                      ~alfresco-version :scope "provided"]
                                          [org.springframework/spring-context                    "3.0.5.RELEASE"  :scope "provided"]
                                          [org.springframework/spring-beans                      "3.0.5.RELEASE"  :scope "provided"]
                                          [org.springframework.extensions.surf/spring-webscripts "1.2.0"          :scope "provided"]
@@ -59,6 +59,6 @@
   :java-source-paths ["src/java"]
   :resource-paths    ["src/resource"]
   :amp-source-path   "src/amp"
-  :amp-target-war    [org.alfresco/alfresco alfresco-version :extension "war"]
+  :amp-target-war    [org.alfresco/alfresco ~alfresco-version :extension "war"]
   :javac-target      "1.7"
   )
