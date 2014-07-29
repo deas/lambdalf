@@ -14,32 +14,53 @@
 ; limitations under the License.
  
 (ns alfresco.behave
-  (:require [alfresco.core :as c]
+  (:require [alfresco.core  :as c]
             [alfresco.model :as m])
-  (:import [org.alfresco.repo.policy JavaBehaviour Behaviour$NotificationFrequency]
-           [org.alfresco.repo.node
-            NodeServicePolicies$OnAddAspectPolicy]))
+  (:import [org.alfresco.repo.policy JavaBehaviour
+                                     Behaviour$NotificationFrequency]
+           [org.alfresco.repo.node NodeServicePolicies$OnCreateNodePolicy
+                                   NodeServicePolicies$OnAddAspectPolicy]))
 
 ;; no static String to use here, unfortunately
 (defn policy-component
   []
   (c/get-bean "policyComponent"))
 
-(defmacro on-add-aspect!
-  "Registers a clojure behavior that will be called when an aspect with
-QName qname. The provided form f must accept two input parameters: a noderef and a qname"
-  [qname f]
-  `(let [p# (reify NodeServicePolicies$OnAddAspectPolicy
-                   (~'onAddAspect [~'this ~'node-in ~'qname-in]
-                     (~f ~'node-in (m/qname-str ~'qname-in))))
-         b# (JavaBehaviour. p#
-                            "onAddAspect"
-                            Behaviour$NotificationFrequency/TRANSACTION_COMMIT)]
-     (.bindClassBehaviour (policy-component)
-                         NodeServicePolicies$OnAddAspectPolicy/QNAME
-                         (m/qname ~qname)
-                         b#)))
+(defn- bind-class-behaviour!
+  [policy-qname binding-type-qname behaviour]
+  (.bindClassBehaviour (policy-component)
+                       policy-qname
+                       (m/qname binding-type-qname)
+                       behaviour)
+  nil)
 
-; ####TODO: add macros for other policy types and notification frequencies
+;####TODO: consider adding 3-arity version that receives a notification frequency (perhaps as a keyword?)
+(defn on-add-aspect!
+  "Registers the given function f as the handler for the onAddAspect policy of the given QName.
+   The function f must accept 2 parameters:
+   1. NodeRef
+   2. QName"
+  [qname f]
+  (let [p (reify NodeServicePolicies$OnAddAspectPolicy
+            (onAddAspect [this node-in qname-in]
+              (f node-in (m/qname-str qname-in))))
+        b (JavaBehaviour. p
+                          "onAddAspect"
+                          Behaviour$NotificationFrequency/TRANSACTION_COMMIT)]
+    (bind-class-behaviour! NodeServicePolicies$OnAddAspectPolicy/QNAME qname b)))
+
+;####TODO: consider adding 3-arity version that receives a notification frequency (perhaps as a keyword?)
+(defn on-create-node!
+  "Registers the given function f as the handler for the onCreateNode policy of the given QName.
+   The function f must accept 1 parameter:
+   1. ChildAssociationRef"
+   [qname f]
+   (let [p (reify NodeServicePolicies$OnCreateNodePolicy
+             (onCreateNode [this child-assoc-ref]
+               (f child-assoc-ref)))
+         b (JavaBehaviour. p "onCreateNode" Behaviour$NotificationFrequency/TRANSACTION_COMMIT)]
+    (bind-class-behaviour! NodeServicePolicies$OnCreateNodePolicy/QNAME qname b)))
+
+; ####TODO: add fns for other policy types
 ; OR (better)
-; provide a generic macro that can handle all possible policy types and notification frequencies
+; generate the functions somewhat like https://github.com/xsc/jansi-clj/blob/master/src/jansi_clj/core.clj#L104
