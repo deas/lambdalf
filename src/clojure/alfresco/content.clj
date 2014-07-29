@@ -22,10 +22,6 @@
   []
   (.getContentService (c/alfresco-services)))
 
-(defprotocol Writer
-  "Provide a way to write content from an arbitrary source"
-  (write! [src node] "Writes the content coming from src into node"))
-
 (defn- is
   "Retrieves an InputStream of the content for the provided node"
   [node]
@@ -34,24 +30,31 @@
 ;; as seen on
 ;; https://groups.google.com/group/clojure/browse_thread/thread/e5fb47befe8b9199
 ;; TODO: make sure we're not breaking utf-8 support
+;; TODO: consider alternative forms that return content as streams, strings, etc.
 (defn read!
   "Returns a lazy seq of the content of the provided node"
   [node]
   (let [is (is node)]
     (map char (take-while #(not= -1 %) (repeatedly #(.read is))))))
 
-(extend-protocol Writer
+(defn get-writer
+  "Returns the ContentWriter for the given node & property (default to cm:content).
+   Should not normally be used directly - write! is preferable."
+  ([node]          (get-writer node ContentModel/PROP_CONTENT))
+  ([node property] (.getWriter (content-service) node property true)))
 
-  String
-  (write!
-   [^String src node]
-    (let [noderef node
-         w (.getWriter (content-service) noderef ContentModel/PROP_CONTENT true)]
-     (.putContent w (ByteArrayInputStream. (.getBytes src "UTF-8")))))
-  
-  File
-  (write!
-   [^File src node]
-    (let [noderef node
-         w (.getWriter (content-service) noderef ContentModel/PROP_CONTENT true)]
-     (.putContent w src))))
+(defmulti write!
+  "Writes content to the given node."
+  #(type (first %&)))
+
+(defmethod write! java.io.InputStream
+  ([src node]          (.putContent (get-writer node) src))
+  ([src node property] (.putContent (get-writer node property) src)))
+
+(defmethod write! java.lang.String
+  ([src node]          (write! (ByteArrayInputStream. (.getBytes src "UTF-8")) node))
+  ([src node property] (write! (ByteArrayInputStream. (.getBytes src "UTF-8")) node property)))
+
+(defmethod write! java.io.File
+  ([src node]          (.putContent (get-writer node) src))
+  ([src node property] (.putContent (get-writer node property) src)))
