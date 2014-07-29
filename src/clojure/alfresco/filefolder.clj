@@ -39,6 +39,7 @@
 (defn create!
   "Creates a child node of the specified parent, using standard file/folder
   associations and names. Returns the nodeRef of the newly created node."
+  ; ####TODO: doesn't seem to be detecting & setting MIME type...
   ([parent child-name]
    (.getNodeRef (.create (file-folder-service) parent child-name ContentModel/TYPE_CONTENT)))
   ([parent child-name child-type]
