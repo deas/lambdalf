@@ -53,14 +53,15 @@
      [~'qname ~'f]
      (let [p# (reify ~policy-if
                 (~policy-method [~'this ~@params]
-                  (~'f [~@params])))
+                  (~'f ~@params)))
            b# (JavaBehaviour. p#
                               ~(str policy-method)
                               Behaviour$NotificationFrequency/TRANSACTION_COMMIT)]
        (.bindClassBehaviour (policy-component)
                             ~(symbol (str policy-if "/QNAME"))
                             (m/qname ~'qname)
-                            b#))));)
+                            b#)
+       nil)));)
 
 (gen-behaviour-registration-fn on-add-aspect!  org.alfresco.repo.node.NodeServicePolicies$OnAddAspectPolicy  onAddAspect  [node qname])
 (gen-behaviour-registration-fn on-create-node! org.alfresco.repo.node.NodeServicePolicies$OnCreateNodePolicy onCreateNode [child-assoc-ref])
