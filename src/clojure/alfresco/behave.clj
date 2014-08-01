@@ -15,8 +15,7 @@
 ; limitations under the License.
  
 (ns alfresco.behave
-  (:require [clojure.string :as s]
-            [alfresco.core  :as c]
+  (:require [alfresco.core  :as c]
             [alfresco.model :as m])
   (:import [org.alfresco.repo.policy JavaBehaviour
                                      Behaviour$NotificationFrequency]))
@@ -51,6 +50,45 @@
                             b#)
        nil)))
 
+(def ^:private policies
+  "A list of all of the Alfresco policies supported by lambdalf (note: doesn't include all of the available policies).
+  This list is used by the gen-policy-registration-fns macro to generate the various registration methods and Alfresco
+  Java API interop boilerplate."
+  [
+    ;clojure-fn-name         alfresco-policy-class                                                      policy-method             policy-method-parameters
+    ;----------------------- -------------------------------------------------------------------------- ------------------------- --------------------------------
+    ; NodeServicePolicies
+    ['on-create-node!        'org.alfresco.repo.node.NodeServicePolicies$OnCreateNodePolicy             'onCreateNode             '[child-assoc-ref]]
+    ['on-update-node!        'org.alfresco.repo.node.NodeServicePolicies$OnUpdateNodePolicy             'onUpdateNode             '[node]]
+    ['on-move-node!          'org.alfresco.repo.node.NodeServicePolicies$OnMoveNodePolicy               'onMoveNode               '[old-child-assoc-ref new-child-assoc-ref]]
+    ['on-update-properties!  'org.alfresco.repo.node.NodeServicePolicies$OnUpdatePropertiesPolicy       'onUpdateProperties       '[node before-props after-props]]
+    ['on-delete-node!        'org.alfresco.repo.node.NodeServicePolicies$OnDeleteNodePolicy             'onDeleteNode             '[child-assoc-ref is-node-archived?]]
+    ['on-restore-node!       'org.alfresco.repo.node.NodeServicePolicies$OnRestoreNodePolicy            'onRestoreNode            '[child-assoc-ref]]
+    ['on-set-node-type!      'org.alfresco.repo.node.NodeServicePolicies$OnSetNodeTypePolicy            'onSetNodeType            '[node old-type new-type]]
+    ['on-add-aspect!         'org.alfresco.repo.node.NodeServicePolicies$OnAddAspectPolicy              'onAddAspect              '[node aspect-qname]]
+    ['on-remove-aspect!      'org.alfresco.repo.node.NodeServicePolicies$OnRemoveAspectPolicy           'onRemoveAspect           '[node aspect-qname]]
+    ['on-create-child-assoc! 'org.alfresco.repo.node.NodeServicePolicies$OnCreateChildAssociationPolicy 'onCreateChildAssociation '[child-assoc-ref is-new-node?]]
+    ['on-delete-child-assoc! 'org.alfresco.repo.node.NodeServicePolicies$OnDeleteChildAssociationPolicy 'onDeleteChildAssociation '[child-assoc-ref]]
+    ['on-create-assoc!       'org.alfresco.repo.node.NodeServicePolicies$OnCreateAssociationPolicy      'onCreateAssociation      '[node-assoc-ref]]
+    ['on-delete-assoc!       'org.alfresco.repo.node.NodeServicePolicies$OnDeleteAssociationPolicy      'onDeleteAssociation      '[node-assoc-ref]]
+
+    ; ContentServicePolicies
+    ['on-content-update!          'org.alfresco.repo.content.ContentServicePolicies$OnContentUpdatePolicy         'onContentUpdate         '[node is-new-content?]]
+    ['on-content-property-update! 'org.alfresco.repo.content.ContentServicePolicies$OnContentPropertyUpdatePolicy 'onContentPropertyUpdate '[node property-qname before-value after-value]]
+    ['on-content-read!            'org.alfresco.repo.content.ContentServicePolicies$OnContentReadPolicy           'onContentRead           '[node]]
+
+    ; VersionServicePolicies
+    ['on-create-version! 'org.alfresco.repo.version.VersionServicePolicies$OnCreateVersionPolicy 'onCreateVersion '[class-ref-qname node version-properties node-details]]
+
+    ; CopyServicePolicies
+    ['on-copy-complete! 'org.alfresco.repo.copy.CopyServicePolicies$OnCopyCompletePolicy 'onCopyComplete '[class-ref-qname source-node target-node is-copy-to-new-node? copy-map]]
+
+    ; CheckOutCheckInServicePolicies
+    ['on-check-out!        'org.alfresco.repo.coci.CheckOutCheckInServicePolicies$OnCheckOut       'onCheckOut       '[working-copy-node]]
+    ['on-check-in!         'org.alfresco.repo.coci.CheckOutCheckInServicePolicies$OnCheckIn        'onCheckIn        '[node]]
+    ['on-cancel-check-out! 'org.alfresco.repo.coci.CheckOutCheckInServicePolicies$OnCancelCheckOut 'onCancelCheckOut '[node]]
+  ])
+
 (defn- third
   "The third item in the given collection."
   [col]
@@ -60,22 +98,6 @@
   "The fourth item in the given collection."
   [col]
   (first (next (next (next col)))))
-
-(def ^:private policies
-  "A list of all of the Alfresco policies supported by lambdalf.  This list is used by the macro below to
-  generate the various registration methods and Alfresco Java API interop boilerplate."
-  [
-    ;clojure-fn-name        alfresco-policy-class                                                policy-method       policy-method-parameters
-    ['on-create-node!       'org.alfresco.repo.node.NodeServicePolicies$OnCreateNodePolicy       'onCreateNode       '[child-assoc-ref]]
-    ['on-update-node!       'org.alfresco.repo.node.NodeServicePolicies$OnUpdateNodePolicy       'onUpdateNode       '[node]]
-    ['on-move-node!         'org.alfresco.repo.node.NodeServicePolicies$OnMoveNodePolicy         'onMoveNode         '[old-child-assoc-ref new-child-assoc-ref]]
-    ['on-update-properties! 'org.alfresco.repo.node.NodeServicePolicies$OnUpdatePropertiesPolicy 'onUpdateProperties '[node before-props after-props]]
-    ['on-delete-node!       'org.alfresco.repo.node.NodeServicePolicies$OnDeleteNodePolicy       'onDeleteNode       '[child-assoc-ref is-node-archived?]]
-    ['on-restore-node!      'org.alfresco.repo.node.NodeServicePolicies$OnRestoreNodePolicy      'onRestoreNode      '[child-assoc-ref]]
-
-    ['on-add-aspect!        'org.alfresco.repo.node.NodeServicePolicies$OnAddAspectPolicy        'onAddAspect        '[node aspect-qname]]
-    ['on-remove-aspect!     'org.alfresco.repo.node.NodeServicePolicies$OnRemoveAspectPolicy     'onRemoveAspect     '[node aspect-qname]]
-  ])
 
 (defmacro ^:private gen-policy-registration-fns
   "Generates all policy registration fns defined in the 'policies' vector."
