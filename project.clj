@@ -17,7 +17,8 @@
 ;    Carlo Sciolla - initial implementation
 ;    Peter Monks   - contributor
 
-(def alfresco-version "5.0.a")
+;; (def alfresco-version "5.0.a")  // "5.0.a" -> lein test -> java.lang.StackOverflowError -> wtf
+(def alfresco-version "4.2.f")
 
 (defproject org.clojars.lambdalf/lambdalf "1.9.999"
   :title            "lambdalf"
@@ -37,17 +38,16 @@
                   ; regardless of scope.  See https://github.com/technomancy/leiningen/issues/741 for an explanation of why
                   ; this occurs.
                 ]
-  :repl-options {:nrepl-middleware
-                 [cider.nrepl.middleware.classpath/wrap-classpath
-                  cider.nrepl.middleware.complete/wrap-complete
-                  cider.nrepl.middleware.info/wrap-info
-                  cider.nrepl.middleware.inspect/wrap-inspect
-                  cider.nrepl.middleware.macroexpand/wrap-macroexpand
-                  cider.nrepl.middleware.stacktrace/wrap-stacktrace
-                  cider.nrepl.middleware.test/wrap-test
-                  cider.nrepl.middleware.trace/wrap-trace
-                  cider.nrepl.middleware.undef/wrap-undef]}
-
+;;  :repl-options {:nrepl-middleware
+;;                 [cider.nrepl.middleware.classpath/wrap-classpath
+;;                  cider.nrepl.middleware.complete/wrap-complete
+;;                  cider.nrepl.middleware.info/wrap-info
+;;                  cider.nrepl.middleware.inspect/wrap-inspect
+;;                  cider.nrepl.middleware.macroexpand/wrap-macroexpand
+;;                  cider.nrepl.middleware.stacktrace/wrap-stacktrace
+;;                  cider.nrepl.middleware.test/wrap-test
+;;                  cider.nrepl.middleware.trace/wrap-trace
+;;                  cider.nrepl.middleware.undef/wrap-undef]}
   :profiles {:dev      { :plugins [;;[lein-amp "0.3.0"]
                                    ] }
              :uberjar  { :aot :all }
@@ -55,7 +55,7 @@
                                          [clj-http                       "0.9.2"           :scope "test"]
                                          [tk.skuro.alfresco/h2-support   "1.6"             :scope "test"]
                                          [com.h2database/h2              "1.3.174"         :scope "test"]
-                                         [org.eclipse.jetty/jetty-runner "9.2.1.v20140609" :scope "test"]
+                                         [org.eclipse.jetty/jetty-runner "9.2.2.v20140723" :scope "test"]
                                        ] }
              :provided { :dependencies [
                                          [org.alfresco/alfresco-core                            ~alfresco-version :scope "provided"]

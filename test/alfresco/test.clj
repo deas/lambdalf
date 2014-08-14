@@ -18,7 +18,8 @@
         [clojure.tools.nrepl])
   (:require [clj-http.client :as http]))
 
-(def lambdalf-url "http://localhost:9090/lambdalf-webapp")
+;; (def lambdalf-url "http://localhost:9090/lambdalf-webapp")
+(def lambdalf-url "http://localhost:9090/alfresco")
 
 (defonce nrepl-started (atom false))
 
