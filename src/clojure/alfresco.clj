@@ -14,7 +14,8 @@
 ; limitations under the License.
 
 (ns alfresco
-  (:require [clojure.tools.nrepl.server :as nrepl]))
+  (:require [clojure.tools.nrepl.server :as nrepl]
+  	    [cider.nrepl :refer (cider-nrepl-handler)]))
 
 ; Hold a reference to the NREPL server
 (def ^:private nrepl-server (atom nil))
@@ -46,7 +47,7 @@
   ([the-server port]
     (if (nrepl-running? the-server)
       (stop-nrepl! the-server))
-    (nrepl/start-server :port port)))
+    (nrepl/start-server :port port :handler cider-nrepl-handler)))
 
 (defn start-nrepl!
   "Starts up an nREPL server, returning the port it's running on."
@@ -70,3 +71,12 @@
   "Bootstraps the given namespaces"
   [this ns-list]
   (apply load-ns ns-list))
+
+(defn ni-startNrepl
+  [this]
+  (alfresco/start-nrepl!))
+
+(gen-class :name alfresco.interop.NReplInit
+  :prefix "ni-"
+  ;; :implements [org.springframework.beans.factory.InitializingBean]
+  :methods [[startNrepl [] void]])

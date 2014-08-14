@@ -9,6 +9,6 @@
                            http://www.springframework.org/schema/util/spring-util-3.0.xsd">  
   
   <!-- Import application contexts from dedicated sub-directory. -->
-  <import resource="classpath:alfresco/module/${project.moduleId}/context/*-context.xml"/>
+  <import resource="classpath:alfresco/module/org.clojars.lambdalf.lambdalf/context/*-context.xml"/>
   
 </beans>

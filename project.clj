@@ -17,9 +17,9 @@
 ;    Carlo Sciolla - initial implementation
 ;    Peter Monks   - contributor
 
-(def alfresco-version "4.2.f")
+(def alfresco-version "5.0.a")
 
-(defproject org.clojars.lambdalf/lambdalf "2.0.0-SNAPSHOT"
+(defproject org.clojars.lambdalf/lambdalf "1.9.999"
   :title            "lambdalf"
   :description      "Lambdalf -- Clojure support for Alfresco"
   :url              "https://github.com/lambdalf/lambdalf"
@@ -32,11 +32,24 @@
   :dependencies [
                   [org.clojure/clojure     "1.6.0"]
                   [org.clojure/tools.nrepl "0.2.3"]
+		  [cider/cider-nrepl "0.7.0"]
                   ; WARNING: do _not_ add test, provided or runtime dependencies here as they will be included in the uberjar,
                   ; regardless of scope.  See https://github.com/technomancy/leiningen/issues/741 for an explanation of why
                   ; this occurs.
                 ]
-  :profiles {:dev      { :plugins [[lein-amp "0.3.0"]] }
+  :repl-options {:nrepl-middleware
+                 [cider.nrepl.middleware.classpath/wrap-classpath
+                  cider.nrepl.middleware.complete/wrap-complete
+                  cider.nrepl.middleware.info/wrap-info
+                  cider.nrepl.middleware.inspect/wrap-inspect
+                  cider.nrepl.middleware.macroexpand/wrap-macroexpand
+                  cider.nrepl.middleware.stacktrace/wrap-stacktrace
+                  cider.nrepl.middleware.test/wrap-test
+                  cider.nrepl.middleware.trace/wrap-trace
+                  cider.nrepl.middleware.undef/wrap-undef]}
+
+  :profiles {:dev      { :plugins [;;[lein-amp "0.3.0"]
+                                   ] }
              :uberjar  { :aot :all }
              :test     { :dependencies [
                                          [clj-http                       "0.9.2"           :scope "test"]
@@ -58,7 +71,7 @@
   :source-paths      ["src/clojure"]
   :java-source-paths ["src/java"]
   :resource-paths    ["src/resource"]
-  :amp-source-path   "src/amp"
-  :amp-target-war    [org.alfresco/alfresco ~alfresco-version :extension "war"]
+;;  :amp-source-path   "src/amp"
+;;  :amp-target-war    [org.alfresco/alfresco ~alfresco-version :extension "war"]
   :javac-target      "1.7"
   )
