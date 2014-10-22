@@ -21,6 +21,10 @@
 (def alfresco-version "5.0.b")
 (def spring-version      "3.2.10.RELEASE")
 (def spring-surf-version "5.0.b")
+(def h2-version "1.4.181")
+(def h2-support-version "1.8")
+(def xml-apis-version-override "1.4.01")
+(def junit-version-override "4.11")
 
 (defproject org.clojars.lambdalf/lambdalf "1.9.999"
   :title            "lambdalf"
@@ -44,6 +48,10 @@
                   ; regardless of scope.  See https://github.com/technomancy/leiningen/issues/741 for an explanation of why
                   ; this occurs.
                 ]
+  :repl-options {
+                 :init-ns scratch
+                 :init (create-application-context)
+                 }
 ;;  :repl-options {:nrepl-middleware
 ;;                 [cider.nrepl.middleware.classpath/wrap-classpath
 ;;                  cider.nrepl.middleware.complete/wrap-complete
@@ -58,11 +66,14 @@
 ;;             :uberjar  { :aot :all }
              :test     { :dependencies [
                                          [clj-http                       "1.0.0"]
-                                         [tk.skuro.alfresco/h2-support   "1.8"]
-                                         [com.h2database/h2              "1.4.181"]
+;;                                         [tk.skuro.alfresco/h2-support   ~h2-support-version]
+;;                                         [com.h2database/h2              ~h2-version"]
                                          [org.eclipse.jetty/jetty-runner "9.2.2.v20140723" :exclusions [org.eclipse.jetty/jetty-jsp]]
+                                         [junit/junit                                     ~junit-version-override]
                                        ] }
              :provided { :dependencies [
+                                         [tk.skuro.alfresco/h2-support   ~h2-support-version]
+                                         [com.h2database/h2              ~h2-version]
                                          [org.alfresco/alfresco-core                            ~alfresco-version]
                                          [org.alfresco/alfresco-data-model                      ~alfresco-version]
                                          [org.alfresco/alfresco-mbeans                          ~alfresco-version]
@@ -72,6 +83,7 @@
                                          [org.springframework/spring-context                    ~spring-version]
                                          [org.springframework/spring-beans                      ~spring-version]
                                          [org.springframework.extensions.surf/spring-webscripts ~spring-surf-version]
+                                         [xml-apis/xml-apis                                     ~xml-apis-version-override]
                                        ] }
             }
   :aot               [alfresco]
