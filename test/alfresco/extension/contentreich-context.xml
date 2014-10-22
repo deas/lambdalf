@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans                                                               
+                           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd                                          
+                           http://www.springframework.org/schema/util                                                                
+                           http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+    <!--
+        curl -X POST -u admin:admin! http://localhost:8080/alfresco/service/clojure/nrepl
+        nrepl port is 7888
+    -->
+    <bean id="startNrepl" class="alfresco.interop.NReplInit" init-method="startNrepl"/>
+</beans>

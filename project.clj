@@ -18,9 +18,9 @@
 ;    Peter Monks   - contributor
 
 ;; https://github.com/technomancy/leiningen/issues/1491 -> lein deps :tree -> java.lang.StackOverflowError
-(def alfresco-version "5.0.a")
-(def spring-version      "3.0.5.RELEASE")
-(def spring-surf-version "1.2.0")
+(def alfresco-version "5.0.b")
+(def spring-version      "3.2.10.RELEASE")
+(def spring-surf-version "5.0.b")
 
 (defproject org.clojars.lambdalf/lambdalf "1.9.999"
   :title            "lambdalf"
@@ -33,10 +33,14 @@
                   ["alfresco.public" "https://artifacts.alfresco.com/nexus/content/groups/public/"]
                 ]
   :dependencies [
-                  [org.clojure/clojure     "1.6.0"]
-                  [org.clojure/tools.nrepl "0.2.3"]
-		  [cider/cider-nrepl "0.7.0"]
-                  ; WARNING: do _not_ add test, provided or runtime dependencies here as they will be included in the uberjar,
+                 [org.clojure/tools.logging "0.3.1"]
+                 [org.clojure/clojure     "1.6.0"]
+                 [org.clojure/tools.nrepl "0.2.6"]
+                                        ; schmetterling introduces deps conflicting with alfresco
+                                        ; [schmetterling "0.0.8"]
+                                        ; SNAPSHOTS do not build uberjars?
+                 [cider/cider-nrepl "0.7.0"]; 8.0-SNAPSHOT"]
+                                        ; WARNING: do _not_ add test, provided or runtime dependencies here as they will be included in the uberjar,
                   ; regardless of scope.  See https://github.com/technomancy/leiningen/issues/741 for an explanation of why
                   ; this occurs.
                 ]
@@ -51,10 +55,10 @@
 ;;                  cider.nrepl.middleware.trace/wrap-trace
 ;;                  cider.nrepl.middleware.undef/wrap-undef]}
   :profiles {:dev      { :plugins []};;[lein-amp "0.3.0"]]}
-             :uberjar  { :aot :all }
+;;             :uberjar  { :aot :all }
              :test     { :dependencies [
                                          [clj-http                       "1.0.0"]
-                                         [tk.skuro.alfresco/h2-support   "1.6"]
+                                         [tk.skuro.alfresco/h2-support   "1.8"]
                                          [com.h2database/h2              "1.4.181"]
                                          [org.eclipse.jetty/jetty-runner "9.2.2.v20140723" :exclusions [org.eclipse.jetty/jetty-jsp]]
                                        ] }
@@ -70,6 +74,7 @@
                                          [org.springframework.extensions.surf/spring-webscripts ~spring-surf-version]
                                        ] }
             }
+  :aot               [alfresco]
   :source-paths      ["src/clojure"]
   :java-source-paths ["src/java"]
   :resource-paths    ["src/resource"]
