@@ -10,5 +10,7 @@
         curl -X POST -u admin:admin! http://localhost:8080/alfresco/service/clojure/nrepl
         nrepl port is 7888
     -->
-    <bean id="startNrepl" class="alfresco.interop.NReplInit" init-method="startNrepl"/>
+    <bean id="lambdalf.nrepl" class="alfresco.interop.NReplInit" init-method="startNrepl">
+        <property name="port" value="7888"/>
+    </bean>
 </beans>

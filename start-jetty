@@ -1,7 +1,12 @@
 #!/bin/bash
-
+#
+# We actually want to run  this straight from leinigen
+#
 # Uses the currently installed jetty-runner jar from your local M2 repository
 # to run a war file from the filesystem
+# 9.2.2.v20140723
+# 9.2.3.v20140905
+JETTY_VERSION=9.2.3.v20140905
 
 : ${REPO=$HOME/.m2/repository}
 : ${JAVA_OPTS='-Xmx512m -XX:MaxPermSize=256m'}
@@ -15,7 +20,7 @@ function artifact-file(){
 }
 
 function run-war(){
-    artifact-file jetty-runner org.eclipse.jetty 9.2.2.v20140723
+    artifact-file jetty-runner org.eclipse.jetty ${JETTY_VERSION}
     JETTY_RUNNER=$ARTIFACT
     echo "Running Jetty"
     java $JAVA_OPTS -jar $JETTY_RUNNER $@

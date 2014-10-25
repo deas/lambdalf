@@ -20,6 +20,12 @@
 
   <bean id="ContextHelper" class="it.sk.alfresco.clojure.ContextHelper"/>
 
-  <bean abstract="true" id="initClojureNs" class="alfresco.interop.ClojureInit" />
+  <bean id="lambdalf.load-namespaces" class="alfresco.interop.ClojureInit" init-method="loadNamespaces">
+      <property name="namespaces">
+          <util:list value-type="java.lang.String">
+              <value>alfresco.*</value>
+          </util:list>
+      </property>
+  </bean>
 
 </beans>
