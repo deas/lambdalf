@@ -6,6 +6,9 @@
                            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                            http://www.springframework.org/schema/util
                            http://www.springframework.org/schema/util/spring-util-3.0.xsd">
-    <bean id="startNrepl" abstract="true"/>
+    <!--
+        On -> off :  Weed those out for the repl - for now
+    -->
     <bean id="contentreich.clj.registrar" abstract="true"/>
+    <bean id="contentreich.start-nrepl" abstract="true"/>
 </beans>

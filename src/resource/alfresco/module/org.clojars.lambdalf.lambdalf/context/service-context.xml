@@ -20,10 +20,28 @@
 
   <bean id="ContextHelper" class="it.sk.alfresco.clojure.ContextHelper"/>
 
-  <bean id="lambdalf.load-namespaces" class="alfresco.interop.ClojureInit" init-method="loadNamespaces">
-      <property name="namespaces">
-          <util:list value-type="java.lang.String">
-              <value>alfresco.*</value>
+  <bean id="contentreich.load-namespaces" class="de.contentreich.ClojureInit" init-method="init">
+      <property name="initNs" value="alfresco"/>
+      <property name="initFn" value="load-namespaces"/>
+      <property name="arguments">
+          <util:list>
+              <util:list>
+                  <value>alfresco.*</value>
+              </util:list>
+          </util:list>
+      </property>
+  </bean>
+
+  <!--
+      curl -X POST -u admin:admin! http://localhost:8080/alfresco/service/clojure/nrepl
+      nrepl port is 7888
+  -->
+  <bean id="contentreich.abstract.start-nrepl" class="de.contentreich.ClojureInit" init-method="init" abstract="true">
+      <property name="initNs" value="alfresco"/>
+      <property name="initFn" value="start-nrepl!"/>
+      <property name="arguments">
+          <util:list value-type="java.lang.Integer">
+              <value>7888</value>
           </util:list>
       </property>
   </bean>

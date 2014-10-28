@@ -76,14 +76,14 @@
      (swap! nrepl-server restart-nrepl! port)
     port))
 
-; Other Clojure gobbledygook
-(gen-class :name    alfresco.interop.ClojureInit
-           :prefix  "ci-"
-           :state state
-           :init init
-           :methods [[loadNamespaces [] void]
-                     [setNamespaces [java.util.List] void]
-                     [getNamespaces [] java.util.List]])
+;; Other Clojure gobbledygook
+;;(gen-class :name    alfresco.interop.ClojureInit
+;;           :prefix  "ci-"
+;;           :state state
+;;           :init init
+;;           :methods [[loadNamespaces [] void]
+;;                     [setNamespaces [java.util.List] void]
+;;                     [getNamespaces [] java.util.List]])
 
 (defn getfield
   [this key]
@@ -124,10 +124,10 @@
   [this]
   (getfield this :port))
 
-(gen-class :name alfresco.interop.NReplInit
-  :prefix "ni-"
-  :state state
-  :init init
-  :methods [[startNrepl [] void]
-            [setPort [int] void]
-            [getPort [] int]])
+;;(gen-class :name alfresco.interop.NReplInit
+;;  :prefix "ni-"
+;;  :state state
+;;  :init init
+;;  :methods [[startNrepl [] void]
+;;            [setPort [int] void]
+;;            [getPort [] int]])

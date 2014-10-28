@@ -98,7 +98,7 @@
                                         [org.springframework.extensions.surf/spring-webscripts ~spring-surf-version]
                                         [xml-apis/xml-apis                                     ~xml-apis-version-override]]}
             }
-  :aot               [alfresco]
+  ;; :aot               [alfresco]
   :source-paths      ["src/clojure"]
   :java-source-paths ["src/java"]
   :resource-paths    ["src/resource"]
