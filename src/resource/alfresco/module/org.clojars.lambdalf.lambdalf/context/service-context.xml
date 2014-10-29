@@ -21,8 +21,8 @@
   <bean id="ContextHelper" class="it.sk.alfresco.clojure.ContextHelper"/>
 
   <bean id="contentreich.load-namespaces" class="de.contentreich.ClojureInit" init-method="init">
-      <property name="initNs" value="alfresco"/>
-      <property name="initFn" value="load-namespaces"/>
+      <property name="namespace" value="alfresco"/>
+      <property name="function" value="load-namespaces"/>
       <property name="arguments">
           <util:list>
               <util:list>
@@ -37,8 +37,8 @@
       nrepl port is 7888
   -->
   <bean id="contentreich.abstract.start-nrepl" class="de.contentreich.ClojureInit" init-method="init" abstract="true">
-      <property name="initNs" value="alfresco"/>
-      <property name="initFn" value="start-nrepl!"/>
+      <property name="namespace" value="alfresco"/>
+      <property name="function" value="start-nrepl!"/>
       <property name="arguments">
           <util:list value-type="java.lang.Integer">
               <value>7888</value>

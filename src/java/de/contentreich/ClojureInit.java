@@ -13,10 +13,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ClojureInit {
     private Logger logger = LoggerFactory.getLogger(getClass().getName());
-    protected String initNs;
-    protected String initFn;
+    protected String namespace;
+    protected String function;
     protected List arguments;
-    protected Object initVal;
 
     public void setArguments(List arguments) {
         this.arguments = arguments;
@@ -26,27 +25,27 @@ public class ClojureInit {
         return this.arguments;
     }
 
-    public void setInitNs(String initNs) {
-        this.initNs = initNs;
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
-    public String getInitNs() {
-        return this.initNs;
-    }
-
-    public void setInitFn(String initFn) {
-        this.initFn = initFn;
+    public String getNamespace() {
+        return this.namespace;
     }
 
-    public String getInitFn() {
-        return this.initFn;
+    public void setFunction(String function) {
+        this.function = function;
+    }
+
+    public String getFunction() {
+        return this.function;
     }
 
     // Meta-Meta !
     public void init() {
         IFn require = Clojure.var("clojure.core", "require");
-        require.invoke(Clojure.read(initNs));
-        logger.info("Invoking " + this.initNs + "/" + this.initFn + " ...");
-        IFn fn = Clojure.var(this.initNs, this.initFn);
+        require.invoke(Clojure.read(this.namespace));
+        logger.info("Invoking " + this.namespace + "/" + this.function + " ...");
+        IFn fn = Clojure.var(this.namespace, this.function);
         int cnt = arguments != null ? arguments.size() : 0;
         Class[] paramTypes = new Class[cnt];
         for (int i=0; i<cnt; i++) {
@@ -55,13 +54,9 @@ public class ClojureInit {
         try {
             Method method = fn.getClass().getMethod("invoke", paramTypes);
             Object[] args = this.arguments != null ? this.arguments.toArray() : new Object[0];
-            this.initVal = method.invoke(fn, args);
+            method.invoke(fn, args);// We do not want the ref to the retval!
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public Object getInitVal() {
-        return this.initVal;
     }
 }

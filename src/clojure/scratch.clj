@@ -1,11 +1,13 @@
 (ns scratch
   (:use [clojure.tools.namespace.repl :only [refresh]])
   (:require [clojure.tools.logging :as log]
-            [clojure.java.classpath :as cp]
             [clojure.tools.namespace.find :as nsf]
             [clojure.repl :as repl]
             [alfresco :as alf]
-            [ring.adapter.jetty9 :refer [run-jetty]]))
+            [alfresco.auth  :as auth]
+            [alfresco.transact :as tx]
+            [ring.adapter.jetty9 :refer [run-jetty]])
+  (:import [org.alfresco.model ContentModel]))
 
 (defn create-application-context
   []
