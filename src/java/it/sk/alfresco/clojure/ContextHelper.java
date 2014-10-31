@@ -29,6 +29,14 @@ import org.springframework.context.ApplicationContextAware;
 public class ContextHelper implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
 
+    static {
+        // http://dev.clojure.org/jira/browse/CLJ-1172
+        try {
+            clojure.lang.RT.load("clojure.core");
+        }  catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         ContextHelper.applicationContext = applicationContext;
     }
@@ -41,6 +49,4 @@ public class ContextHelper implements ApplicationContextAware {
     public static ApplicationContext getApplicationContext() {
         return applicationContext;
     }
-
-    // public static
 }
