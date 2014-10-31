@@ -1,5 +1,6 @@
 (ns scratch
-  (:use [clojure.tools.namespace.repl :only [refresh]])
+  (:use [clojure.tools.namespace.repl :only [refresh]]
+        [midje.repl])
   (:require [clojure.tools.logging :as log]
             [clojure.tools.namespace.find :as nsf]
             [clojure.repl :as repl]
@@ -17,6 +18,7 @@
   []
   (println "Initializing application context")
   (org.alfresco.util.ApplicationContextHelper/getApplicationContext (into-array String ["classpath:alfresco/application-context.xml" "classpath:alfresco/extension/no-jetty-ctx.xml"])))
+
 
 
 (defn start-jetty
