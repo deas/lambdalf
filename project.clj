@@ -37,7 +37,7 @@
   :repositories [
                   ["alfresco.public" "https://artifacts.alfresco.com/nexus/content/groups/public/"]
                 ]
-  ;; To keep things simple for now, we put all the tooling here
+  ;; To keep things simple for now, we put all the tooling here as well
   :dependencies [
                  [org.clojure/tools.logging "0.3.1"]
                  [org.clojure/tools.namespace "0.2.7"]
@@ -45,6 +45,7 @@
                  [org.clojure/clojure     "1.6.0"]
                  [org.clojure/tools.nrepl "0.2.6"]
                  [org.clojure/java.classpath "0.2.2"]
+                 [org.clojure/java.jmx "0.3.0"]
                  ;; schmetterling introduces deps conflicting with alfresco
                  ;; [schmetterling "0.0.8"]
                  ;; SNAPSHOTS do not build uberjars?
@@ -71,11 +72,14 @@
   ;;                  cider.nrepl.middleware.test/wrap-test
   ;;                  cider.nrepl.middleware.trace/wrap-trace
   ;;                  cider.nrepl.middleware.undef/wrap-undef]}
-  :profiles {:dev      {:plugins [];;[lein-amp "0.3.0"]]}
+  :profiles {:dev      {:plugins [
+                                  [lein-midje "3.1.3"]
+                                  ];;[lein-amp "0.3.0"]]}
                         :dependencies [
                                         [tk.skuro.alfresco/h2-support   ~h2-support-version]
                                         [com.h2database/h2              ~h2-version]
                                         [info.sunng/ring-jetty9-adapter "0.7.2"]
+                                        [midje                     "1.6.3"]
                                         [clj-http                       "1.0.0"]
                                        ]}
              ;;             :uberjar  { :aot :all }
@@ -103,6 +107,11 @@
   :java-source-paths ["src/java"]
   :resource-paths    ["src/resource"]
   ;; :amp-source-path   "src/amp"
-  ;; :amp-target-war    [org.alfresco/alfresco ~alfresco-version :extension "war"]
+  ;; :amp-target-war    [org.alfresco/alfresco ~alfresco-version :extension "war"
   :javac-target      "1.7"
+  :test-paths ["test" "itest"]
+  ;; http://www.jayway.com/2014/09/09/integration-testing-setup-with-midje-and-leiningen/
+  ;; :aliases {"itest" ["midje" ":filters" "it"]
+  ;;          "test"  ["midje"]
+  ;;;          "utest" ["midje" ":filters" "-it"]}
   )
