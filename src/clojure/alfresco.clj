@@ -85,44 +85,44 @@
 ;;                     [setNamespaces [java.util.List] void]
 ;;                     [getNamespaces [] java.util.List]])
 
-(defn getfield
-  [this key]
-  (@(.state this) key))
-
-(defn setfield
-  [this key value]
-  (swap! (.state this) into {key value}))
-
-(defn ci-init []
-  "Store our fields as a hash"
-  [[] (atom {})])
-
-(defn ci-loadNamespaces
-  "Bootstraps instance namespaces"
-  [this]
-  (load-namespaces (getfield this :namespaces)))
-
-(defn ci-getNamespaces
-  [this]
-  (getfield this :namespaces))
-
-(defn ci-setNamespaces [this namespaces]
-  (setfield this :namespaces namespaces))
-
-(defn ni-init []
-  "Store our fields as a hash"
-  [[] (atom {})])
-
-(defn ni-startNrepl
-  [this]
-  (alfresco/start-nrepl! (getfield this :port)))
-
-(defn ni-setPort [this port]
-  (setfield this :port port))
-
-(defn ni-getPort
-  [this]
-  (getfield this :port))
+;; (defn getfield
+;;   [this key]
+;;   (@(.state this) key))
+;;
+;; (defn setfield
+;;   [this key value]
+;;   (swap! (.state this) into {key value}))
+;;
+;; (defn ci-init []
+;;   "Store our fields as a hash"
+;;   [[] (atom {})])
+;;
+;; (defn ci-loadNamespaces
+;;   "Bootstraps instance namespaces"
+;;   [this]
+;;   (load-namespaces (getfield this :namespaces)))
+;;
+;; (defn ci-getNamespaces
+;;   [this]
+;;   (getfield this :namespaces))
+;;
+;; (defn ci-setNamespaces [this namespaces]
+;;   (setfield this :namespaces namespaces))
+;;
+;; (defn ni-init []
+;;   "Store our fields as a hash"
+;;   [[] (atom {})])
+;;
+;; (defn ni-startNrepl
+;;   [this]
+;;   (alfresco/start-nrepl! (getfield this :port)))
+;;
+;; (defn ni-setPort [this port]
+;;   (setfield this :port port))
+;;
+;; (defn ni-getPort
+;;   [this]
+;;   (getfield this :port))
 
 ;;(gen-class :name alfresco.interop.NReplInit
 ;;  :prefix "ni-"

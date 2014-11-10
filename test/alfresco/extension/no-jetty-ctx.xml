@@ -9,6 +9,6 @@
     <!--
         On -> off :  Weed those out for the repl - for now
     -->
-    <bean id="contentreich.clj.registrar" abstract="true"/>
-    <bean id="contentreich.start-nrepl" abstract="true"/>
+    <bean id="lambdalf.clj.registrar" abstract="true"/>
+    <!--bean id="contentreich.start-nrepl" abstract="true"/-->
 </beans>

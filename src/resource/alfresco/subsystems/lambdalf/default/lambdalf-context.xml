@@ -24,7 +24,7 @@
   <bean id="clojure_factory"
         class="clojure.lang.Compiler"
         factory-method="load"
-        depends-on="ContextHelper">
+        depends-on="lambdalf.ContextHelper">
     <constructor-arg>
       <bean class="java.io.StringReader">
           <constructor-arg
@@ -34,23 +34,15 @@
     </constructor-arg>
   </bean>
 
-  <bean id="webscripts.clj.scriptprocessor.factory"
-        class="org.springframework.extensions.webscripts.processor.ClojureScriptProcessorFactory"/>
-
-  <bean id="contentreich.clj.registrar" class="org.springframework.extensions.webscripts.ScriptProcessorRegistrar" init-method="init">
-    <property name="registry"  ref="webscripts.repo.registry.scriptprocessor"/>
-    <property name="factory"   ref="webscripts.clj.scriptprocessor.factory"/>
-    <property name="name"      value="Clojure Script Processor"/>
-    <property name="extension" value="clj"/>
+  <bean id="load-namespaces" parent="clojure_fact">
+      <constructor-arg value='${lambdalf.load-namespaces}'/>
   </bean>
 
-  <bean id="ContextHelper" class="it.sk.alfresco.clojure.ContextHelper"/>
-
-  <bean id="contentreich.load-namespaces" parent="clojure_fact">
-      <constructor-arg value='(require (quote alfresco))(alfresco/load-namespaces ["alfresco.*"])'/>
+  <bean id="start-nrepl" parent="clojure_fact">
+      <constructor-arg value='${lambdalf.start-nrepl}'/>
   </bean>
 
-  <!--bean id="contentreich.abstract.start-nrepl" parent="clojure_fact">
+  <!--bean id="start-nrepl" parent="clojure_fact">
       <constructor-arg value='(require (quote alfresco))(alfresco/start-nrepl! 7888)'/>
   </bean-->
 

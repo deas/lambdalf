@@ -6,9 +6,24 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                            http://www.springframework.org/schema/util
-                           http://www.springframework.org/schema/util/spring-util-3.0.xsd">  
-  
+                           http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+  <bean id="webscripts.clj.scriptprocessor.factory"
+        class="org.springframework.extensions.webscripts.processor.ClojureScriptProcessorFactory"/>
+
+  <!-- The first three stay until we either start up webscripts or find a convient way to weed it out for the subsys -->
+  <bean id="lambdalf.clj.registrar" class="org.springframework.extensions.webscripts.ScriptProcessorRegistrar" init-method="init">
+    <property name="registry"  ref="webscripts.repo.registry.scriptprocessor"/>
+    <property name="factory"   ref="webscripts.clj.scriptprocessor.factory"/>
+    <property name="name"      value="Clojure Script Processor"/>
+    <property name="extension" value="clj"/>
+  </bean>
+
+  <bean id="lambdalf.ContextHelper" class="it.sk.alfresco.clojure.ContextHelper"/>
+
   <!-- Import application contexts from dedicated sub-directory. -->
-  <import resource="classpath:alfresco/module/org.clojars.lambdalf.lambdalf/context/*-context.xml"/>
-  
+  <bean id="lambdalf" class="org.alfresco.repo.management.subsystems.ChildApplicationContextFactory" parent="abstractPropertyBackedBean">
+      <property name="autoStart" value="true"/>
+  </bean>
+
 </beans>
