@@ -40,3 +40,11 @@
   "Gets the application context"
   []
   (ContextHelper/getApplicationContext))
+
+(defn stop-subsystem
+  [bean]
+  (.stop (get-bean bean)))
+
+(defn start-subsystem
+  [bean]
+  (.start (get-bean bean)))

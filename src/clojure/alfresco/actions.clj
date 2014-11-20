@@ -36,25 +36,25 @@
                             multi))
 
 ;; Interop: allows the Clojure action to be registered as a Spring bean
-(gen-class :name alfresco.actions.ActionRegistrar
-           :extends  org.alfresco.repo.action.executer.ActionExecuterAbstractBase
-           :prefix "act-"
-           :state concrete
-           :constructors {[String] []} ; FQN of the concrete Action
-           :init clojure-init)         ; base class already has a 'init' method
-
-(defn act-clojure-init
-  "Stores an instance of the supplied concrete Action as a state"
-  [^String impl]
-  [[] (eval (list (symbol (str impl "."))))]) ; dirty reflection hack
-
-(defn act-executeImpl
-  "Passes the ball to the concrete Action"
-  [this action node]
-  (let [impl (.concrete this)]
-    (exec impl action node)))
-
-(defn act-addParameterDefinitions
-  "Passes the ball to the concrete Action"
-  [this ^List params]
-  (map #(.add params %) (needs-params (.concrete this))))
+;; (gen-class :name alfresco.actions.ActionRegistrar
+;;            :extends  org.alfresco.repo.action.executer.ActionExecuterAbstractBase
+;;            :prefix "act-"
+;;            :state concrete
+;;            :constructors {[String] []} ; FQN of the concrete Action
+;;            :init clojure-init)         ; base class already has a 'init' method
+;;
+;; (defn act-clojure-init
+;;   "Stores an instance of the supplied concrete Action as a state"
+;;   [^String impl]
+;;   [[] (eval (list (symbol (str impl "."))))]) ; dirty reflection hack
+;;
+;; (defn act-executeImpl
+;;   "Passes the ball to the concrete Action"
+;;   [this action node]
+;;   (let [impl (.concrete this)]
+;;     (exec impl action node)))
+;;
+;; (defn act-addParameterDefinitions
+;;   "Passes the ball to the concrete Action"
+;;   [this ^List params]
+;;   (map #(.add params %) (needs-params (.concrete this))))

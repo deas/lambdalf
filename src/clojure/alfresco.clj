@@ -19,7 +19,8 @@
             [clojure.tools.logging :as log]
             [cider.nrepl :refer (cider-nrepl-handler)]
             [clojure.java.classpath :as cp]
-            [clojure.tools.namespace.find :as nsf]))
+            [clojure.tools.namespace.find :as nsf]
+            [alfresco.core :as c]))
 
 ; Hold a reference to the NREPL server
 (def ^:private nrepl-server (atom nil))

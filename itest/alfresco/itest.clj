@@ -13,7 +13,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns alfresco.test
+(ns alfresco.itest
   (:use ;; [clojure.test]
         [clojure.tools.nrepl])
   (:require [clj-http.client :as http]))

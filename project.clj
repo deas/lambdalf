@@ -109,9 +109,9 @@
   ;; :amp-source-path   "src/amp"
   ;; :amp-target-war    [org.alfresco/alfresco ~alfresco-version :extension "war"
   :javac-target      "1.7"
-  :test-paths ["test" "itest"]
+  :test-paths ["itest" "test"]
   ;; http://www.jayway.com/2014/09/09/integration-testing-setup-with-midje-and-leiningen/
-  ;; :aliases {"itest" ["midje" ":filters" "it"]
-  ;;          "test"  ["midje"]
-  ;;;          "utest" ["midje" ":filters" "-it"]}
+  :aliases {"itest" ["midje" ":filters" "it"]
+            "test"  ["midje"]
+            "utest" ["midje" ":filters" "-it"]}
   )
