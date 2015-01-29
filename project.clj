@@ -18,14 +18,14 @@
 ;;    Peter Monks     - contributor
 ;;    Andreas Steffan - contributor
 
-(def alfresco-version "5.0.b")
+(def alfresco-version "5.0.c")
 (def spring-version      "3.2.10.RELEASE")
-(def spring-surf-version "5.0.b")
+(def spring-surf-version "5.0.c")
 (def h2-version "1.4.181")
 (def h2-support-version "1.8")
 (def xml-apis-version-override "1.4.01")
 (def junit-version-override "4.11")
-(def cider-nrepl-version "0.8.0-SNAPSHOT");; // "0.8.0-20141015.153819"
+(def cider-nrepl-version "0.8.2");; // "0.8.0-20141015.153819"
 
 (defproject de.contentreich.lambdalf/lambdalf "1.9.999" ;; For now. Want to actually merge back
   :title            "lambdalf"
@@ -38,6 +38,7 @@
                   ["alfresco.public" "https://artifacts.alfresco.com/nexus/content/groups/public/"]
                 ]
   ;; To keep things simple for now, we put all the tooling here as well
+  ;; http://jakemccrary.com/blog/2015/01/11/overview-of-my-leiningen-profiles-dot-clj/
   :dependencies [
                  [org.clojure/tools.logging "0.3.1"]
                  [org.clojure/tools.namespace "0.2.7"]

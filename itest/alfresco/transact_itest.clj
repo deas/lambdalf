@@ -58,7 +58,7 @@
                                :cm/name)) => "Company Home"
                                ;; (first-element [] :default) => :default
                                )
-  (fact "Obtaining first child in sites-of as admin in tx works" :it
+  (fact "First child in sites-of as admin in tx is directory" :it
     (t/in-ro-tx-as
      (a/admin)
      ;; Could be surf-config folder n/site?
