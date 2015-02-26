@@ -25,7 +25,7 @@
 (def h2-support-version "1.8")
 (def xml-apis-version-override "1.4.01")
 (def junit-version-override "4.11")
-(def cider-nrepl-version "0.8.2");; // "0.8.0-20141015.153819"
+(def cider-nrepl-version "0.9.0-SNAPSHOT");; // "0.8.0-20141015.153819" SNAPSHOT
 
 (defproject de.contentreich.lambdalf/lambdalf "1.9.999" ;; For now. Want to actually merge back
   :title            "lambdalf"
@@ -44,7 +44,7 @@
                  [org.clojure/tools.namespace "0.2.7"]
                  [org.clojure/tools.trace "0.7.8"]
                  [org.clojure/clojure     "1.6.0"]
-                 [org.clojure/tools.nrepl "0.2.6"]
+                 [org.clojure/tools.nrepl "0.2.7"]
                  [org.clojure/java.classpath "0.2.2"]
                  [org.clojure/java.jmx "0.3.0"]
                  ;; schmetterling introduces deps conflicting with alfresco
@@ -76,6 +76,7 @@
   :profiles {:dev      {:plugins [
                                   [lein-midje "3.1.3"]
                                   ];;[lein-amp "0.3.0"]]}
+                        :source-paths      ["src/clojure"]  ;; "dev"
                         :dependencies [
                                         [tk.skuro.alfresco/h2-support   ~h2-support-version]
                                         [com.h2database/h2              ~h2-version]
@@ -112,7 +113,7 @@
   :javac-target      "1.7"
   :test-paths ["itest" "test"]
   ;; http://www.jayway.com/2014/09/09/integration-testing-setup-with-midje-and-leiningen/
-  :aliases {"itest" ["midje" ":filters" "it"]
+  :aliases {"itest" ["midje" ":filters" "it"] ;;"src/clojure" "test" "itest"
             "test"  ["midje"]
             "utest" ["midje" ":filters" "-it"]}
   )

@@ -40,15 +40,15 @@
            url (str lambdalf-url "/service" path)]
        (method url {:basic-auth ["admin" "admin"]}))))
 
-(defn start-nrepl []
-  (call-wscript "/clojure/nrepl" :post))
+;; (defn start-nrepl []
+;;   (call-wscript "/clojure/nrepl" :post))
 
-(defn ensure-nrepl
-  "Ensures NREPL start is invoked only once"
-  []
-  (when (not @nrepl-started)
-    (start-nrepl)
-    (reset! nrepl-started true)))
+;; (defn ensure-nrepl
+;;   "Ensures NREPL start is invoked only once"
+;;   []
+;;   (when (not @nrepl-started)
+;;     (start-nrepl)
+;;     (reset! nrepl-started true)))
 
 ;; Will go to integration tests
 (defn create-application-context
@@ -57,6 +57,12 @@
   (org.alfresco.util.ApplicationContextHelper/getApplicationContext (into-array String context-locations)))
 
 
+(defn start-jetty
+  "Starts jetty ... someday"
+  []
+  ;; (run-jetty app {:port 50505})
+  )
+
 (defn ensure-context
   "Ensures Application context is initialized only once"
   []
@@ -64,16 +70,16 @@
     (create-application-context)
     (reset! context-started true)))
 
-; copied from NREPL test sources
-(defmacro defftest
-  "defines a test to be run against a remotely running nrepl server in a lambdalf instance"
-  [name & body]
-  `(deftest ~name
-     (with-open [transport# (connect :port 7888)]
-       (let [~'transport transport#
-             ~'client (client transport# 10000)
-             ~'session (client-session ~'client)
-             ~'repl-eval #(message % {:op :eval :code %2})
-             ~'repl-value (comp read-string :value first)
-             ~'repl-values (comp response-values ~'repl-eval)]
-         ~@body))))
+;; ; copied from NREPL test sources
+;; (defmacro defftest
+;;   "defines a test to be run against a remotely running nrepl server in a lambdalf instance"
+;;   [name & body]
+;;   `(deftest ~name
+;;      (with-open [transport# (connect :port 7888)]
+;;        (let [~'transport transport#
+;;              ~'client (client transport# 10000)
+;;              ~'session (client-session ~'client)
+;;              ~'repl-eval #(message % {:op :eval :code %2})
+;;              ~'repl-value (comp read-string :value first)
+;;              ~'repl-values (comp response-values ~'repl-eval)]
+;;          ~@body))))

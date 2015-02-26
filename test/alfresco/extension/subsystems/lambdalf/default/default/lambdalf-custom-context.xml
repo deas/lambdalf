@@ -8,6 +8,12 @@
                            http://www.springframework.org/schema/util
                            http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
+    <!--
+        Bean implementations should support lifecycle register/unregister
+        Actions should unregister (Abstract base registers, ActionServiceImpl does not have unregister functionality
+        PolicyComponent does not support unregistration either
+    -->
+
     <!-- Custom (application) extensions which participate in subsystem lifecycle -->
     <!--
     <bean id="custom-behaviour" parent="clojure_fact">

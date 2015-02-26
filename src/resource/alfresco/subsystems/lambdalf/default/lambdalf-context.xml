@@ -8,18 +8,12 @@
                            http://www.springframework.org/schema/util
                            http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
+
   <!-- Credits to https://github.com/henrik42/spring-break -->
   <bean id="clojure_fact"
         abstract="true"
         factory-bean="clojure_factory"
-        factory-method="new_instance">
-  </bean>
-
-  <!--bean id="a_clojure_bean"
-        parent="clojure_fact">
-      <constructor-arg value=":it-works" />
-  </bean-->
-
+        factory-method="new_instance"/>
 
   <bean id="clojure_factory"
         class="clojure.lang.Compiler"
@@ -34,16 +28,9 @@
     </constructor-arg>
   </bean>
 
-  <bean id="load-namespaces" parent="clojure_fact">
-      <constructor-arg value='${lambdalf.load-namespaces}'/>
+  <bean id="lambdalf.init" parent="clojure_fact">
+      <constructor-arg value='${lambdalf-init}'/>
+      <constructor-arg value='${lambdalf-init.ressource}'/>
   </bean>
-
-  <bean id="start-nrepl" parent="clojure_fact">
-      <constructor-arg value='${lambdalf.start-nrepl}'/>
-  </bean>
-
-  <!--bean id="start-nrepl" parent="clojure_fact">
-      <constructor-arg value='(require (quote alfresco))(alfresco/start-nrepl! 7888)'/>
-  </bean-->
 
 </beans>

@@ -15,10 +15,10 @@
 
 (ns contentreich.samples
   (:require [clojure.tools.logging :as log]
-            [alfresco.auth :as a]
+            [alfresco.auth :as au]
             [alfresco.nodes :as n]
             ;; [clj-http.client :as http]
-            [alfresco.transact :as t]))
+            [alfresco.transact :as tx]))
 
 (defn sample-action
   [action noderef]

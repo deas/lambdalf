@@ -58,4 +58,7 @@ public class ClojureAction extends ActionExecuterAbstractBase {
             list.addAll(this.paramDefs);
         }
     }
+
+    // Abstract base registers, ActionServiceImpl does not have unregister functionality
+
 }

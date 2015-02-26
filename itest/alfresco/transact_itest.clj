@@ -3,9 +3,9 @@
         ;; [clojure.test]
         ;; [clojure.tools.nrepl]
         [alfresco.itest])
-  (:require [alfresco.auth :as a]
+  (:require [alfresco.auth :as auth]
             [alfresco.nodes :as n]
-            [alfresco.transact :as t]
+            [alfresco.transact :as tx]
             ;; [clj-http.client :as http]
             )
   )
@@ -26,7 +26,7 @@
 ;; Old school
 ;; (deftest transact-itests
 ;;  (testing "Adding up as admin in tx failed."
-;;    (is (= 2 (t/in-ro-tx-as (a/admin) (+ 1 1))))))
+;;    (is (= 2 (tx/in-ro-tx-as (auth/admin) (+ 1 1))))))
 
 ;; (deftest can-connect
 ;;  (let [response (call-wscript "/index")]
@@ -37,29 +37,31 @@
 ;;  (do
 ;;    (are [result f expr] (= result (f (repl-eval client (code expr))))
 ;;         ;; Run a simple clojure expression within an Alfresco txn
-;;         2 repl-value (t/in-ro-tx-as (a/admin) (+ 1 1))
+;;         2 repl-value (tx/in-ro-tx-as (auth/admin) (+ 1 1))
 ;;
 ;;         ;; Get the name of Company Home within an Alfresco txn
-;;         "Company Home" repl-value (t/in-ro-tx-as (a/admin)
+;;         "Company Home" repl-value (tx/in-ro-tx-as (auth/admin)
 ;;                                    (n/property (n/company-home)
 ;;                                                :cm/name))
 ;;         ;; Grab the first Share site and validate that it is indeed a Share site
-;;         true repl-value (t/in-ro-tx-as (a/admin) (n/site? (first (n/children (n/sites-home)))))
+;;         true repl-value (tx/in-ro-tx-as (auth/admin) (n/site? (first (n/children (n/sites-home)))))
 ;;         )))
 
 (facts "About transactions" :it
   (fact "Adding up as admin in tx" :it
-    (t/in-ro-tx-as (a/admin) (+ 1 1)) => 2
-    ;; (is (= 2 (t/in-ro-tx-as (a/admin) (+ 1 1)))) => 2)
+    (tx/in-ro-tx-as (auth/admin) (+ 1 1)) => 2
+    ;; (is (= 2 (tx/in-ro-tx-as (auth/admin) (+ 1 1)))) => 2)
     )
   (fact "Obtaining company home as admin in tx works" :it
-    (t/in-ro-tx-as (a/admin)
+    (tx/in-ro-tx-as (auth/admin)
                    (n/property (n/company-home)
                                :cm/name)) => "Company Home"
                                ;; (first-element [] :default) => :default
                                )
-  (fact "First child in sites-of as admin in tx is directory" :it
-    (t/in-ro-tx-as
-     (a/admin)
-     ;; Could be surf-config folder n/site?
-     (n/dir? (first (n/children (n/sites-home))))) => true))
+  (fact "Admin in tx sees a site in sites-home" :it
+    (tx/in-ro-tx-as
+     (auth/admin)
+     (n/site?
+      (->> (n/children (n/sites-home))
+           (filter n/site?) ;; Could be surf-config folder n/site?
+           first))) => true))

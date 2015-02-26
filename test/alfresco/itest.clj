@@ -64,16 +64,16 @@
     (create-application-context)
     (reset! context-started true)))
 
-; copied from NREPL test sources
-(defmacro defftest
-  "defines a test to be run against a remotely running nrepl server in a lambdalf instance"
-  [name & body]
-  `(deftest ~name
-     (with-open [transport# (connect :port 7888)]
-       (let [~'transport transport#
-             ~'client (client transport# 10000)
-             ~'session (client-session ~'client)
-             ~'repl-eval #(message % {:op :eval :code %2})
-             ~'repl-value (comp read-string :value first)
-             ~'repl-values (comp response-values ~'repl-eval)]
-         ~@body))))
+;; ; copied from NREPL test sources
+;; (defmacro defftest
+;;   "defines a test to be run against a remotely running nrepl server in a lambdalf instance"
+;;   [name & body]
+;;   `(deftest ~name
+;;      (with-open [transport# (connect :port 7888)]
+;;        (let [~'transport transport#
+;;              ~'client (client transport# 10000)
+;;              ~'session (client-session ~'client)
+;;              ~'repl-eval #(message % {:op :eval :code %2})
+;;              ~'repl-value (comp read-string :value first)
+;;              ~'repl-values (comp response-values ~'repl-eval)]
+;;          ~@body))))

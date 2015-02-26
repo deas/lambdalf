@@ -41,4 +41,5 @@
   (fact "Company home is folder" :it
     (m/qname-keyword
      (a/as-admin
-      (n/type-qname (n/company-home)))) => :cm/folder))
+      (n/type-qname (n/company-home)))) => :cm/folder)
+  (fact ""))

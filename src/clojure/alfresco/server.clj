@@ -13,8 +13,8 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-
-(ns alfresco
+;; TODO : May be a good idea to use stuartsierra/component here
+(ns alfresco.server
   (:require [clojure.tools.nrepl.server :as nrepl]
             [clojure.tools.logging :as log]
             [cider.nrepl :refer (cider-nrepl-handler)]
@@ -24,21 +24,6 @@
 
 ; Hold a reference to the NREPL server
 (def ^:private nrepl-server (atom nil))
-
-(defn load-namespaces
-  "Load namespaces by regular expression names. Returns their symbols"
-  ([ns-regexps]
-     (log/info "Requiring namespaces ...")
-     (let [re (map re-pattern ns-regexps)]
-       (->> (nsf/find-namespaces (cp/classpath))
-            (filter (fn[sym] (some (fn[re] (re-matches re (name sym))) re)) ,)
-            (map (fn[sym] ()
-                   (log/info "Require" (name sym))
-                   (require sym)
-                   ;; (println "Loading " (name sym))
-                   sym
-                   ))
-            doall))))
 
 (defn nrepl-running?
   "Is the nREPL server running?"
@@ -77,58 +62,9 @@
      (swap! nrepl-server restart-nrepl! port)
     port))
 
-;; Other Clojure gobbledygook
-;;(gen-class :name    alfresco.interop.ClojureInit
-;;           :prefix  "ci-"
-;;           :state state
-;;           :init init
-;;           :methods [[loadNamespaces [] void]
-;;                     [setNamespaces [java.util.List] void]
-;;                     [getNamespaces [] java.util.List]])
-
-;; (defn getfield
-;;   [this key]
-;;   (@(.state this) key))
-;;
-;; (defn setfield
-;;   [this key value]
-;;   (swap! (.state this) into {key value}))
-;;
-;; (defn ci-init []
-;;   "Store our fields as a hash"
-;;   [[] (atom {})])
-;;
-;; (defn ci-loadNamespaces
-;;   "Bootstraps instance namespaces"
-;;   [this]
-;;   (load-namespaces (getfield this :namespaces)))
-;;
-;; (defn ci-getNamespaces
-;;   [this]
-;;   (getfield this :namespaces))
-;;
-;; (defn ci-setNamespaces [this namespaces]
-;;   (setfield this :namespaces namespaces))
-;;
-;; (defn ni-init []
-;;   "Store our fields as a hash"
-;;   [[] (atom {})])
-;;
-;; (defn ni-startNrepl
-;;   [this]
-;;   (alfresco/start-nrepl! (getfield this :port)))
-;;
-;; (defn ni-setPort [this port]
-;;   (setfield this :port port))
-;;
-;; (defn ni-getPort
-;;   [this]
-;;   (getfield this :port))
-
-;;(gen-class :name alfresco.interop.NReplInit
-;;  :prefix "ni-"
-;;  :state state
-;;  :init init
-;;  :methods [[startNrepl [] void]
-;;            [setPort [int] void]
-;;            [getPort [] int]])
+(defn add-cp
+  "Add to classpath"
+  [url]
+  (-> (Thread/currentThread)
+      (.getContextClassLoader)
+      (.addURL (java.net.URL. url))))
