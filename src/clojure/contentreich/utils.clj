@@ -4,11 +4,8 @@
 
 
 ;; Implement one sans Alfresco
-;; (defn create-application-context [])
-
-;; "classpath*:alfresco/**/*-context.xml"
 (defn cp-find-resources
-  "Find spring Resources in by location pattern"
+  "Find spring Resources in by location pattern, e.g. \"classpath*:alfresco/**/*-context.xml\""
   [loc-pattern]
   (. (PathMatchingResourcePatternResolver.) getResources loc-pattern))
 
@@ -20,3 +17,26 @@
 ;; String (indicating potential roots to search).
 
 ;; (map #(.. % (getURL) (toString)) (contentreich.utils/cp-find-resources "classpath*:alfresco/**/*-context.xml"))
+
+
+;; Debug all the things!
+(defn contextual-eval [ctx expr]
+  (eval
+   `(let [~@(mapcat (fn [[k v]] [k `'~v]) ctx)]
+      ~expr)))
+
+(defmacro local-context []
+  (let [symbols (keys &env)]
+    (zipmap (map (fn [sym] `(quote ~sym)) symbols) symbols)))
+
+(defn readr [prompt exit-code]
+  (let [input (clojure.main/repl-read prompt exit-code)]
+    (if (= input ::tl)
+      exit-code
+      input)))
+
+(defmacro break []
+  `(clojure.main/repl
+    :prompt #(print "debug=> ")
+    :read readr
+    :eval (partial contextual-eval (local-context))))

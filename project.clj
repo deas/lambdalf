@@ -26,7 +26,7 @@
 (def xml-apis-version-override "1.4.01")
 (def junit-version-override "4.11")
 (def cider-nrepl-version "0.9.0-SNAPSHOT");; // "0.8.0-20141015.153819" SNAPSHOT
-(def jetty-version "9.2.8.v20150217");; 9.2.8.v20150217;; "9.2.3.v20140905)"
+(def jetty-version "9.2.8.v20150217")
 
 
 (defproject de.contentreich.lambdalf/lambdalf "1.9.999" ;; For now. Want to actually merge back
@@ -47,6 +47,9 @@
                  [org.clojure/tools.trace "0.7.8"]
                  [org.clojure/clojure     "1.6.0"]
                  [org.clojure/tools.nrepl "0.2.7"]
+                 [com.gfredericks/debug-repl "0.0.6"]
+                 [spyscope "0.1.5"]
+                 [evalive "1.1.0"]
                  [org.clojure/java.classpath "0.2.2"]
                  [org.clojure/java.jmx "0.3.0"]
                  ;; schmetterling introduces deps conflicting with alfresco
@@ -59,22 +62,26 @@
                  ;; explanation of why this occurs.
                  [com.stuartsierra/component "0.2.2"]
                 ]
-  :plugins [[cider/cider-nrepl ~cider-nrepl-version]]
+  :plugins [[cider/cider-nrepl ~cider-nrepl-version]
+            ;; http://dev.clojure.org/jira/browse/NREPL-53
+            [com.gfredericks/nrepl-53-monkeypatch "0.1.0"]]
   :repl-options {
                  :timeout 120000
+                 :nrepl-middleware [ com.gfredericks.debug-repl/wrap-debug-repl
+                                    ;;  [cider.nrepl.middleware.classpath/wrap-classpath
+                                    ;;   cider.nrepl.middleware.complete/wrap-complete
+                                    ;;   cider.nrepl.middleware.info/wrap-info
+                                    ;;   cider.nrepl.middleware.inspect/wrap-inspect
+                                    ;;   cider.nrepl.middleware.macroexpand/wrap-macroexpand
+                                    ;;   cider.nrepl.middleware.stacktrace/wrap-stacktrace
+                                    ;;   cider.nrepl.middleware.test/wrap-test
+                                    ;;   cider.nrepl.middleware.trace/wrap-trace
+                                    ;;   cider.nrepl.middleware.undef/wrap-undef]
+                                    ]
                  ;; :init-ns scratch
                  ;; :init (create-application-context)
                  }
-  ;;  :repl-options {:nrepl-middleware
-  ;;                 [cider.nrepl.middleware.classpath/wrap-classpath
-  ;;                  cider.nrepl.middleware.complete/wrap-complete
-  ;;                  cider.nrepl.middleware.info/wrap-info
-  ;;                  cider.nrepl.middleware.inspect/wrap-inspect
-  ;;                  cider.nrepl.middleware.macroexpand/wrap-macroexpand
-  ;;                  cider.nrepl.middleware.stacktrace/wrap-stacktrace
-  ;;                  cider.nrepl.middleware.test/wrap-test
-  ;;                  cider.nrepl.middleware.trace/wrap-trace
-  ;;                  cider.nrepl.middleware.undef/wrap-undef]}
+
   :profiles {:dev      {:plugins [
                                   [lein-midje "3.1.3"]
                                   ];;[lein-amp "0.3.0"]]}
@@ -124,6 +131,8 @@
   ;; :amp-target-war    [org.alfresco/alfresco ~alfresco-version :extension "war"
   :javac-target      "1.7"
   :test-paths ["itest" "test"]
+
+  :injections [(require 'spyscope.core)]
   ;; http://www.jayway.com/2014/09/09/integration-testing-setup-with-midje-and-leiningen/
   :aliases {"itest" ["midje" ":filters" "it"] ;;"src/clojure" "test" "itest"
             "test"  ["midje"]

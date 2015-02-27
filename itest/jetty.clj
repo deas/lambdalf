@@ -3,8 +3,12 @@
 
   Fire it up like so:
 
-  (def s (jetty/create-jetty (jetty/create-handler \"./test-webapp\" \"/alfresco\")
-                             {:port 1234 :configurator jetty/alfresco-configure :join? false}))"
+  (def jetty-component
+       (jetty/new-jetty (jetty/create-jetty (jetty/create-handler \"./test-webapp\" \"/alfresco\")
+                                       {:port 1234 :configurator jetty/alfresco-configure })))
+  (.start jetty-component)
+  "
+
   (:import (org.eclipse.jetty.server Handler
                                      Server
                                      Request
@@ -21,7 +25,9 @@
            (org.eclipse.jetty.util.thread QueuedThreadPool
                                           ScheduledExecutorScheduler)
            (org.eclipse.jetty.util.ssl SslContextFactory))
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string]
+            [clojure.tools.logging :as log]
+            [com.stuartsierra.component :as component]))
 
 (defn- http-config
   [{:as options
@@ -156,9 +162,8 @@ supplied options:
                 :on-close  #(close-fn % %2 %3 %4)        ; ^Session ws-session statusCode reason
                 :on-error  #(error-fn % %2 %3)}}         ; ^Session ws-session e"
   [handler {:as options
-            :keys [max-threads websockets configurator join?]
-            :or {max-threads 50
-                 join? true}}]
+            :keys [max-threads websockets configurator];;  join?
+            :or {max-threads 50}}] ;; join? true
   (let [^Server s (create-server options)
         ^QueuedThreadPool p (QueuedThreadPool. (int max-threads))
         ;; ring-app-handler (proxy-handler handler)
@@ -174,7 +179,24 @@ supplied options:
     (.setHandler s contexts)
     (when-let [c configurator]
       (c s))
-    (.start s)
-    (when join?
-      (.join s))
+    ;; (.start s)
+    ;; (when join?
+    ;;   (.join s))
     s))
+
+(defrecord Jetty [server]
+  component/Lifecycle
+
+  (start [component]
+    (log/info "Starting Jetty")
+    (assoc component :server server)
+    (.start server))
+
+  (stop [component]
+    (log/info "Stopping Jetty")
+    (.stop (:server component))
+    (assoc component :server nil))
+  )
+
+(defn new-jetty [server]
+  (map->Jetty {:server server}))

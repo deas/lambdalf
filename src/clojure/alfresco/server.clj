@@ -13,14 +13,15 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-;; TODO : May be a good idea to use stuartsierra/component here
+;; TODO : Wrap nrepl server in a component
 (ns alfresco.server
   (:require [clojure.tools.nrepl.server :as nrepl]
             [clojure.tools.logging :as log]
             [cider.nrepl :refer (cider-nrepl-handler)]
             [clojure.java.classpath :as cp]
             [clojure.tools.namespace.find :as nsf]
-            [alfresco.core :as c]))
+            [alfresco.core :as c]
+            [com.stuartsierra.component :as component]))
 
 ; Hold a reference to the NREPL server
 (def ^:private nrepl-server (atom nil))
