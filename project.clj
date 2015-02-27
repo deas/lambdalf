@@ -26,6 +26,8 @@
 (def xml-apis-version-override "1.4.01")
 (def junit-version-override "4.11")
 (def cider-nrepl-version "0.9.0-SNAPSHOT");; // "0.8.0-20141015.153819" SNAPSHOT
+(def jetty-version "9.2.8.v20150217");; 9.2.8.v20150217;; "9.2.3.v20140905)"
+
 
 (defproject de.contentreich.lambdalf/lambdalf "1.9.999" ;; For now. Want to actually merge back
   :title            "lambdalf"
@@ -60,7 +62,7 @@
   :plugins [[cider/cider-nrepl ~cider-nrepl-version]]
   :repl-options {
                  :timeout 120000
-                 :init-ns scratch
+                 ;; :init-ns scratch
                  ;; :init (create-application-context)
                  }
   ;;  :repl-options {:nrepl-middleware
@@ -78,20 +80,26 @@
                                   ];;[lein-amp "0.3.0"]]}
                         :source-paths      ["src/clojure"]  ;; "dev"
                         :dependencies [
-                                        [tk.skuro.alfresco/h2-support   ~h2-support-version]
-                                        [com.h2database/h2              ~h2-version]
-                                        [info.sunng/ring-jetty9-adapter "0.7.2"]
-                                        [midje                     "1.6.3"]
-                                        [clj-http                       "1.0.0"]
+                                       [tk.skuro.alfresco/h2-support   ~h2-support-version]
+                                       [com.h2database/h2              ~h2-version]
+                                       [clj-http                       "1.0.0"]
+                                       [org.eclipse.jetty/jetty-server ~jetty-version]
+                                       [org.eclipse.jetty.websocket/websocket-server ~jetty-version]
+                                       [midje                     "1.6.3"]
+                                       [org.eclipse.jetty/jetty-webapp ~jetty-version]
+                                       [org.eclipse.jetty/jetty-util ~jetty-version]
                                        ]}
              ;;             :uberjar  { :aot :all }
              :test     { :dependencies [
+                                        [tk.skuro.alfresco/h2-support   ~h2-support-version]
+                                        [com.h2database/h2              ~h2-version]
                                         [clj-http                       "1.0.0"]
+                                        [org.eclipse.jetty/jetty-server ~jetty-version]
+                                        [org.eclipse.jetty.websocket/websocket-server ~jetty-version]
                                         ;; [tk.skuro.alfresco/h2-support   ~h2-support-version]
                                         ;; [com.h2database/h2              ~h2-version"]
-                                        [info.sunng/ring-jetty9-adapter "0.7.2"]
-                                        ;; 9.2.2.v20140723 vs 9.2.3.v20140905
-                                        ;; [org.eclipse.jetty/jetty-runner "9.2.3.v20140905" :exclusions [org.eclipse.jetty/jetty-jsp]]
+                                        [org.eclipse.jetty/jetty-webapp ~jetty-version]
+                                        [org.eclipse.jetty/jetty-util ~jetty-version]
                                         [junit/junit                                          ~junit-version-override]] }
              :provided { :dependencies [
                                         [org.alfresco/alfresco-core                            ~alfresco-version]
@@ -99,6 +107,10 @@
                                         [org.alfresco/alfresco-mbeans                          ~alfresco-version]
                                         [org.alfresco/alfresco-remote-api                      ~alfresco-version]
                                         [org.alfresco/alfresco-repository                      ~alfresco-version]
+
+                                        ;; You have to build the web-client yourself for now
+                                        ;; "mvn -f pom-alfresco-web-client.xml install" in web-client/
+                                        [org.alfresco/alfresco-web-client                      ~alfresco-version]
                                         [org.springframework/spring-context                    ~spring-version]
                                         [org.springframework/spring-beans                      ~spring-version]
                                         [org.springframework.extensions.surf/spring-webscripts ~spring-surf-version]
