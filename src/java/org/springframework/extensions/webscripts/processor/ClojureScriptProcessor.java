@@ -40,10 +40,12 @@ import spring.surf.webscript.WebScript;
  */
 public class ClojureScriptProcessor extends AbstractScriptProcessor {
 
+    /*
     static {
         // needed as clojure.lang.Compiler needs RT to be fully loaded beforehand
         RT.list();
     }
+    */
 
     private static final Log log = LogFactory.getLog(ClojureScriptProcessor.class);
 
@@ -70,14 +72,12 @@ public class ClojureScriptProcessor extends AbstractScriptProcessor {
      * Executes the Clojure script
      *
      * @param is    the input stream
-     * @param out   the writer.  This can be null if no output is required.
      * @param model the context model for the script
      * @return WebScript  a new instance of the requested Clojure backed web script
      */
     @SuppressWarnings(value = "unchecked")
-    protected WebScript compileClojureScript(InputStream is, Writer out, Map<String, Object> model) {
+    protected WebScript compileClojureScript(InputStream is, Map<String, Object> model) {
         log.debug("Executing Clojure script");
-        log.debug("This line is to get rid of an IDEA warning: " + out);
 
         this.addProcessorModelExtensions(model);
 
@@ -118,7 +118,7 @@ public class ClojureScriptProcessor extends AbstractScriptProcessor {
             if (log.isDebugEnabled()) {
                 log.debug("Compiling new Clojure webscript at path " + path);
             }
-            webscript = compileClojureScript(scriptContent.getInputStream(), null, model);
+            webscript = compileClojureScript(scriptContent.getInputStream(), model);
         }
         if (webscript == null) {
             throw new ScriptException("Cannot compile Clojure web script at path " + path);
@@ -131,7 +131,7 @@ public class ClojureScriptProcessor extends AbstractScriptProcessor {
             this.compiledWebScripts.put(path, webscript);
         }
 
-        return webscript.run(scriptContent.getInputStream(), null, model);
+        return webscript.run(null, null, model);// scriptContent.getInputStream(), null, model);
     }
 
     /**

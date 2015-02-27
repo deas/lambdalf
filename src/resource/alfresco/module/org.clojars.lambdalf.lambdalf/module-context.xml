@@ -19,6 +19,22 @@
     <property name="extension" value="clj"/>
   </bean>
 
+    <bean id="cljScriptProcessor" class="de.contentreich.lambdalf.repo.CljScriptProcessor" init-method="register">
+        <property name="name" value="clojure"/>
+        <property name="extension" value="clj"/>
+        <property name="compile" value="true"/>
+        <property name="scriptService">
+            <ref bean="scriptService"/>
+        </property>
+        <!-- Creates ScriptNodes which require the ServiceRegistry -->
+        <property name="serviceRegistry">
+            <ref bean="ServiceRegistry"/>
+        </property>
+        <property name="storeUrl" value="${spaces.store}"/>
+        <property name="storePath"  value="${spaces.company_home.childname}"/>
+    </bean>
+
+
   <bean id="lambdalf.ContextHelper" class="it.sk.alfresco.clojure.ContextHelper"/>
 
   <!-- Import application contexts from dedicated sub-directory. -->

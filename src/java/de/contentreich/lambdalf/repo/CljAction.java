@@ -1,4 +1,4 @@
-package de.contentreich.lambdalf;
+package de.contentreich.lambdalf.repo;
 
 import java.util.List;
 import clojure.java.api.Clojure;
@@ -9,15 +9,13 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 /**
  * Created by deas on 1/16/15.
  * Can't reify abstract class, but delegation is not that bad
  * http://dev.clojure.org/jira/browse/CLJ-1255
  */
-public class ClojureAction extends ActionExecuterAbstractBase {
-    private static Logger logger = LoggerFactory.getLogger(ClojureAction.class);
+public class CljAction extends ActionExecuterAbstractBase {
+    private static Logger logger = LoggerFactory.getLogger(CljAction.class);
     // By name because function can be redefined
     String ns = null;
     String fn = null;

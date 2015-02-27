@@ -10,7 +10,7 @@
     <!--bean id="contentreich.start-nrepl" parent="contentreich.abstract.start-nrepl"/-->
 
 
-    <bean id="clj-sample-action" class="de.contentreich.lambdalf.ClojureAction"
+    <bean id="clj-sample-action" class="de.contentreich.lambdalf.repo.CljAction"
           parent="action-executer">
         <property name="ns" value="contentreich.samples"/>
         <property name="fn" value="sample-action"/>
