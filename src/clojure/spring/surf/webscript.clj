@@ -35,3 +35,9 @@
     (.putAll view-model-orig (k2s view-model))
     model))
 
+(defn create-script
+  "Create a script for the processor(s)"
+  [f]
+  (reify spring.surf.webscript.WebScript
+      (run [this in out model]
+        (f in out model))))
