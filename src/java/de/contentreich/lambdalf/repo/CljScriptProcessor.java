@@ -18,36 +18,35 @@
  */
 package de.contentreich.lambdalf.repo;
 
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.ConcurrentHashMap;
-
-import net.sf.acegisecurity.AuthenticationException;
-
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.processor.ProcessorExtension;
-import org.alfresco.repo.jscript.*;
+import org.alfresco.repo.jscript.ClasspathScriptLocation;
+import org.alfresco.repo.jscript.ValueConverter;
 import org.alfresco.repo.processor.BaseProcessor;
 import org.alfresco.scripts.ScriptException;
 import org.alfresco.scripts.ScriptResourceHelper;
 import org.alfresco.scripts.ScriptResourceLoader;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.model.FileNotFoundException;
-import org.alfresco.service.cmr.repository.ContentIOException;
-import org.alfresco.service.cmr.repository.ContentReader;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.ScriptLocation;
-import org.alfresco.service.cmr.repository.ScriptProcessor;
-import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.FileCopyUtils;
+import spring.surf.webscript.WebScript;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+
 /*
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ImporterTopLevel;
@@ -57,32 +56,34 @@ import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.WrapFactory;
 import org.mozilla.javascript.WrappedException;
 */
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.FileCopyUtils;
-import spring.surf.webscript.WebScript;
 
 /**
  * Implementation of the ScriptProcessor using the Rhino JavaScript library.
  *
  * @author Kevin Roast
  */
-public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor, ScriptResourceLoader, InitializingBean
-{
+public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor, ScriptResourceLoader/* , InitializingBean*/ {
     private static final Log logger = LogFactory.getLog(CljScriptProcessor.class);
-    private static final Log callLogger = LogFactory.getLog(CljScriptProcessor.class.getName()+".calls");
+    private static final Log callLogger = LogFactory.getLog(CljScriptProcessor.class.getName() + ".calls");
 
     private static final String PATH_CLASSPATH = "classpath:";
-
+    private BaseProcessor rhinoProcessor;
     /** Wrap Factory */
     // private static final WrapFactory wrapFactory = new RhinoWrapFactory();
 
-    /** Base Value Converter */
+    /**
+     * Base Value Converter
+     */
     private final ValueConverter valueConverter = new ValueConverter();
 
-    /** Store into which to resolve cm:name based script paths */
+    /**
+     * Store into which to resolve cm:name based script paths
+     */
     private StoreRef storeRef;
 
-    /** Store root path to resolve cm:name based scripts path from */
+    /**
+     * Store root path to resolve cm:name based scripts path from
+     */
     private String storePath;
 
     /** Pre initialized secure scope object. */
@@ -91,58 +92,53 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     /** Pre initialized non secure scope object. */
     // private Scriptable nonSecureScope;
 
-    /** Flag to enable or disable runtime script compliation */
+    /**
+     * Flag to enable or disable runtime script compliation
+     */
     private boolean compile = true;
 
     /** Flag to enable the sharing of sealed root scopes between scripts executions */
     // private boolean shareSealedScopes = true;
 
-    /** Cache of runtime compiled script instances */
+    /**
+     * Cache of runtime compiled script instances
+     */
     // private final Map<String, Script> scriptCache = new ConcurrentHashMap<String, Script>(256);
-    private final Map<String, WebScript> scriptCache = new ConcurrentHashMap<String, WebScript>(256);;
+    private final Map<String, WebScript> scriptCache = new ConcurrentHashMap<String, WebScript>(256);
+    ;
 
 
     /**
      * Set the default store reference
      *
-     * @param   storeRef    The default store reference
+     * @param storeRef The default store reference
      */
-    public void setStoreUrl(String storeRef)
-    {
+    public void setStoreUrl(String storeRef) {
         this.storeRef = new StoreRef(storeRef);
     }
 
     /**
-     * @param storePath     The store path to set.
+     * @param storePath The store path to set.
      */
-    public void setStorePath(String storePath)
-    {
+    public void setStorePath(String storePath) {
         this.storePath = storePath;
     }
 
     /**
-     * @param compile   the compile flag to set
+     * @param compile the compile flag to set
      */
-    public void setCompile(boolean compile)
-    {
+    public void setCompile(boolean compile) {
         this.compile = compile;
     }
 
-    /**
-     * @param shareSealedScopes true to allow sharing of sealed scopes between script executions - set to
-     * false to disable this feature and ensure that a new scope is created for each executed script.
-     */
-    /* public void setShareSealedScopes(boolean shareSealedScopes)
-    {
-        this.shareSealedScopes = shareSealedScopes;
+    public void setRhinoProcessor(BaseProcessor rhinoProcessor) {
+        this.rhinoProcessor = rhinoProcessor;
     }
-    */
 
     /**
      * @see org.alfresco.service.cmr.repository.ScriptProcessor#reset()
      */
-    public void reset()
-    {
+    public void reset() {
         this.scriptCache.clear();
     }
 
@@ -159,19 +155,15 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     /**
      * @see org.alfresco.service.cmr.repository.ScriptProcessor#execute(org.alfresco.service.cmr.repository.ScriptLocation, java.util.Map)
      */
-    public Object execute(ScriptLocation location, Map<String, Object> model)
-    {
-        try
-        {
+    public Object execute(ScriptLocation location, Map<String, Object> model) {
+        try {
             // test the cache for a pre-compiled script matching our path
             WebScript script = null;
             String path = location.getPath();
-            if (this.compile && location.isCachable())
-            {
+            if (this.compile && location.isCachable()) {
                 script = this.scriptCache.get(path);
             }
-            if (script == null)
-            {
+            if (script == null) {
                 if (logger.isDebugEnabled())
                     logger.debug("Resolving and compiling script path: " + path);
 
@@ -184,9 +176,9 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
 
                 // compile the script and cache the result
                 // Context cx = Context.enter();
-                try
-                {
-                    script = compileClojureScript(location.getInputStream());;// cx.compileString(source, location.toString(), 1, null);
+                try {
+                    script = compileClojureScript(location.getInputStream());
+                    ;// cx.compileString(source, location.toString(), 1, null);
 
                     // We do not worry about more than one user thread compiling the same script.
                     // If more than one request thread compiles the same script and adds it to the
@@ -194,27 +186,21 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
                     // rely on the ConcurrentHashMap impl to deal both with ensuring the safety of the
                     // underlying structure with asynchronous get/put operations and for fast
                     // multi-threaded access to the common cache.
-                    if (this.compile &&  location.isCachable())
-                    {
+                    if (this.compile && location.isCachable()) {
                         this.scriptCache.put(path, script);
                     }
-                }
-                finally
-                {
+                } finally {
                     // Context.exit();
                 }
             }
 
             String debugScriptName = null;
-            if (callLogger.isDebugEnabled())
-            {
+            if (callLogger.isDebugEnabled()) {
                 int i = path.lastIndexOf('/');
-                debugScriptName = (i != -1) ? path.substring(i+1) : path;
+                debugScriptName = (i != -1) ? path.substring(i + 1) : path;
             }
-            return executeScriptImpl(script, model, location.isSecure(), debugScriptName);
-        }
-        catch (Throwable err)
-        {
+            return executeScriptImpl(script, model/*, location.isSecure()*/, debugScriptName);
+        } catch (Throwable err) {
             throw new ScriptException("Failed to execute script '" + location.toString() + "': " + err.getMessage(), err);
         }
     }
@@ -222,49 +208,38 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     /**
      * @see org.alfresco.service.cmr.repository.ScriptProcessor#execute(java.lang.String, java.util.Map)
      */
-    public Object execute(String location, Map<String, Object> model)
-    {
+    public Object execute(String location, Map<String, Object> model) {
         return execute(new ClasspathScriptLocation(location), model);
     }
 
     /**
      * @see org.alfresco.service.cmr.repository.ScriptProcessor#execute(org.alfresco.service.cmr.repository.NodeRef, org.alfresco.service.namespace.QName, java.util.Map)
      */
-    public Object execute(NodeRef nodeRef, QName contentProp, Map<String, Object> model)
-    {
-        try
-        {
-            if (this.services.getNodeService().exists(nodeRef) == false)
-            {
+    public Object execute(NodeRef nodeRef, QName contentProp, Map<String, Object> model) {
+        try {
+            if (this.services.getNodeService().exists(nodeRef) == false) {
                 throw new AlfrescoRuntimeException("Script Node does not exist: " + nodeRef);
             }
 
-            if (contentProp == null)
-            {
+            if (contentProp == null) {
                 contentProp = ContentModel.PROP_CONTENT;
             }
             ContentReader cr = this.services.getContentService().getReader(nodeRef, contentProp);
-            if (cr == null || cr.exists() == false)
-            {
+            if (cr == null || cr.exists() == false) {
                 throw new AlfrescoRuntimeException("Script Node content not found: " + nodeRef);
             }
 
             // compile the script based on the node content
             WebScript script;
             // Context cx = Context.enter();
-            try
-            {
-                script =  compileClojureScript(cr.getContentInputStream());// cx.compileString(resolveScriptImports(cr.getContentString()), nodeRef.toString(), 1, null);
-            }
-            finally
-            {
+            try {
+                script = compileClojureScript(cr.getContentInputStream());// cx.compileString(resolveScriptImports(cr.getContentString()), nodeRef.toString(), 1, null);
+            } finally {
                 // Context.exit();
             }
 
-            return executeScriptImpl(script, model, false, nodeRef.toString());
-        }
-        catch (Throwable err)
-        {
+            return executeScriptImpl(script, model/*, false*/, nodeRef.toString());
+        } catch (Throwable err) {
             throw new ScriptException("Failed to execute script '" + nodeRef.toString() + "': " + err.getMessage(), err);
         }
     }
@@ -272,25 +247,18 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     /**
      * @see org.alfresco.service.cmr.repository.ScriptProcessor#executeString(java.lang.String, java.util.Map)
      */
-    public Object executeString(String source, Map<String, Object> model)
-    {
-        try
-        {
+    public Object executeString(String source, Map<String, Object> model) {
+        try {
             // compile the script based on the node content
             WebScript script;
             // Context cx = Context.enter();
-            try
-            {
+            try {
                 script = null;// cx.compileString(resolveScriptImports(source), "AlfrescoJS", 1, null);
-            }
-            finally
-            {
+            } finally {
                 // Context.exit();
             }
-            return executeScriptImpl(script, model, true, "string script");
-        }
-        catch (Throwable err)
-        {
+            return executeScriptImpl(script, model/*, true*/, "string script");
+        } catch (Throwable err) {
             throw new ScriptException("Failed to execute supplied script: " + err.getMessage(), err);
         }
     }
@@ -304,7 +272,7 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
      * </pre>
      * Either a classpath resource, NodeRef or cm:name path based script can be includes. Multiple includes
      * of the same script are dealt with correctly and nested includes of scripts is fully supported.
-     * <p>
+     * <p/>
      * Note that for performance reasons the script import directive syntax and placement in the file
      * is very strict. The import lines <i>must</i> always be first in the file - even before any comments.
      * Immediately that the script service detects a non-import line it will assume the rest of the
@@ -312,52 +280,42 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
      * all imports should be at the top of the script, one following the other, in the correct syntax and with
      * no comments present - the only separators valid between import directives is white space.
      *
-     * @param script        The script content to resolve imports in
-     *
+     * @param script The script content to resolve imports in
      * @return a valid script with all nested includes resolved into a single script instance
      */
-    private String resolveScriptImports(String script)
-    {
+    private String resolveScriptImports(String script) {
         return ScriptResourceHelper.resolveScriptImports(script, this, logger);
     }
 
     /**
      * Load a script content from the specific resource path.
      *
-     * @param resource      Resources can be of the form:
-     * <pre>
-     * classpath:alfresco/includeme.js
-     * workspace://SpacesStore/6f73de1b-d3b4-11db-80cb-112e6c2ea048
-     * /Company Home/Data Dictionary/Scripts/includeme.js
-     * </pre>
-     *
+     * @param resource Resources can be of the form:
+     *                 <pre>
+     *                 classpath:alfresco/includeme.js
+     *                 workspace://SpacesStore/6f73de1b-d3b4-11db-80cb-112e6c2ea048
+     *                 /Company Home/Data Dictionary/Scripts/includeme.js
+     *                 </pre>
      * @return the content from the resource, null if not recognised format
-     *
      * @throws AlfrescoRuntimeException on any IO or ContentIO error
      */
-    public String loadScriptResource(String resource)
-    {
+    public String loadScriptResource(String resource) {
         String result = null;
 
-        if (resource.startsWith(PATH_CLASSPATH))
-        {
-            try
-            {
+        if (resource.startsWith(PATH_CLASSPATH)) {
+            try {
                 // Load from classpath
                 String scriptClasspath = resource.substring(PATH_CLASSPATH.length());
                 URL scriptResource = getClass().getClassLoader().getResource(scriptClasspath);
-                if (scriptResource == null && scriptClasspath.startsWith("/"))
-                {
+                if (scriptResource == null && scriptClasspath.startsWith("/")) {
                     // The Eclipse classloader prefers alfresco/foo to /alfresco/foo, try that
                     scriptResource = getClass().getClassLoader().getResource(scriptClasspath.substring(1));
                 }
-                if (scriptResource == null)
-                {
+                if (scriptResource == null) {
                     throw new AlfrescoRuntimeException("Unable to locate included script classpath resource: " + resource);
                 }
                 InputStream stream = scriptResource.openStream();
-                if (stream == null)
-                {
+                if (stream == null) {
                     throw new AlfrescoRuntimeException("Unable to load included script classpath resource: " + resource);
                 }
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -365,63 +323,46 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
                 byte[] bytes = os.toByteArray();
                 // create the string from the byte[] using encoding if necessary
                 result = new String(bytes, "UTF-8");
-            }
-            catch (IOException err)
-            {
+            } catch (IOException err) {
                 throw new AlfrescoRuntimeException("Unable to load included script classpath resource: " + resource);
             }
-        }
-        else
-        {
+        } else {
             NodeRef scriptRef;
-            if (resource.startsWith("/"))
-            {
+            if (resource.startsWith("/")) {
                 // resolve from default SpacesStore as cm:name based path
                 // TODO: remove this once FFS correctly allows name path resolving from store root!
                 NodeRef rootNodeRef = this.services.getNodeService().getRootNode(this.storeRef);
                 List<NodeRef> nodes = this.services.getSearchService().selectNodes(
                         rootNodeRef, this.storePath, null, this.services.getNamespaceService(), false);
-                if (nodes.size() == 0)
-                {
+                if (nodes.size() == 0) {
                     throw new AlfrescoRuntimeException("Unable to find store path: " + this.storePath);
                 }
                 StringTokenizer tokenizer = new StringTokenizer(resource, "/");
                 List<String> elements = new ArrayList<String>(6);
-                if (tokenizer.hasMoreTokens())
-                {
+                if (tokenizer.hasMoreTokens()) {
                     tokenizer.nextToken();
                 }
-                while (tokenizer.hasMoreTokens())
-                {
+                while (tokenizer.hasMoreTokens()) {
                     elements.add(tokenizer.nextToken());
                 }
-                try
-                {
+                try {
                     FileInfo fileInfo = this.services.getFileFolderService().resolveNamePath(nodes.get(0), elements);
                     scriptRef = fileInfo.getNodeRef();
-                }
-                catch (FileNotFoundException err)
-                {
+                } catch (FileNotFoundException err) {
                     throw new AlfrescoRuntimeException("Unable to load included script repository resource: " + resource);
                 }
-            }
-            else
-            {
+            } else {
                 scriptRef = new NodeRef(resource);
             }
 
             // load from NodeRef default content property
-            try
-            {
+            try {
                 ContentReader cr = this.services.getContentService().getReader(scriptRef, ContentModel.PROP_CONTENT);
-                if (cr == null || cr.exists() == false)
-                {
+                if (cr == null || cr.exists() == false) {
                     throw new AlfrescoRuntimeException("Included Script Node content not found: " + resource);
                 }
                 result = cr.getContentString();
-            }
-            catch (ContentIOException err)
-            {
+            } catch (ContentIOException err) {
                 throw new AlfrescoRuntimeException("Unable to load included script repository resource: " + resource);
             }
         }
@@ -433,265 +374,43 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
      * Execute the supplied script content. Adds the default data model and custom configured root
      * objects into the root scope for access by the script.
      *
-     * @param script        The script to execute.
-     * @param model         Data model containing objects to be added to the root scope.
-     * @param secure        True if the script is considered secure and may access java.* libs directly
+     * @param script          The script to execute.
+     * @param model           Data model containing objects to be added to the root scope.
+     *                        param secure        True if the script is considered secure and may access java.* libs directly
      * @param debugScriptName To identify the script in debug messages.
-     *
      * @return result of the script execution, can be null.
-     *
      * @throws AlfrescoRuntimeException
      */
-    private Object executeScriptImpl(WebScript script, Map<String, Object> model, boolean secure, String debugScriptName)
-        throws AlfrescoRuntimeException
-    {
+    private Object executeScriptImpl(WebScript script, Map<String, Object> model/*, boolean secure*/, String debugScriptName)
+            throws AlfrescoRuntimeException {
         long startTime = 0;
-        if (callLogger.isDebugEnabled())
-        {
-            callLogger.debug(debugScriptName+" Start");
+        if (callLogger.isDebugEnabled()) {
+            callLogger.debug(debugScriptName + " Start");
             startTime = System.nanoTime();
         }
-        // Convert the model
-        // model = convertToRhinoModel(model);
-
-        // Context cx = Context.enter();
-        try
-        {
-            /*
-            synchronized (this) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Caching Clojure webscript at path " + path);
-                }
-                this.compiledWebScripts.put(path, webscript);
+        try {
+            for (ProcessorExtension ex : this.processorExtensions.values()) {
+                model.put(ex.getExtensionName(), ex);
             }
-            */
-
-            return script.run(null, null, model);//scriptContent.getInputStream(), null, model);
-
-            // return null;
-            // Create a thread-specific scope from one of the shared scopes.
-            // See http://www.mozilla.org/rhino/scopes.html
-            /*
-            cx.setWrapFactory(wrapFactory);
-            Scriptable scope;
-            if (this.shareSealedScopes)
-            {
-                Scriptable sharedScope = secure ? this.nonSecureScope : this.secureScope;
-                scope = cx.newObject(sharedScope);
-                scope.setPrototype(sharedScope);
-                scope.setParentScope(null);
-            }
-            else
-            {
-                scope = initScope(cx, secure, false);
-            }
-
-            // there's always a model, if only to hold the util objects
-            if (model == null)
-            {
-                model = new HashMap<String, Object>();
-            }
-
-            // add the global scripts
-            for (ProcessorExtension ex : this.processorExtensions.values())
+            /* Can't embed object in code, maybe print-dup not defined:
+            for (ProcessorExtension ex : this.rhinoProcessor.getProcessorExtensions()) // Ugh! Hijack from JS.
             {
                 model.put(ex.getExtensionName(), ex);
             }
-
-            // insert supplied object model into root of the default scope
-            for (String key : model.keySet())
-            {
-            	try
-            	{
-	                // set the root scope on appropriate objects
-	                // this is used to allow native JS object creation etc.
-	                Object obj = model.get(key);
-	                if (obj instanceof Scopeable)
-	                {
-	                    ((Scopeable)obj).setScope(scope);
-	                }
-
-	                // convert/wrap each object to JavaScript compatible
-	                Object jsObject = Context.javaToJS(obj, scope);
-
-	                // insert into the root scope ready for access by the script
-	                ScriptableObject.putProperty(scope, key, jsObject);
-            	}
-            	catch(AuthenticationException e)
-            	{
-            		// ok, log and don't add to the root scope
-            		logger.info("Unable to add " + key + " to root scope: ", e);
-            	}
-            }
-
-            // execute the script and return the result
-            Object result = script.exec(cx, scope);
-
-            // extract java object result if wrapped by Rhino
-            return valueConverter.convertValueForJava(result);
             */
-        }
-        /*
-        catch (WrappedException w)
-        {
-            if (callLogger.isDebugEnabled())
-            {
-                callLogger.debug(debugScriptName+" Exception", w);
-            }
-            Throwable err = w.getWrappedException();
-            if (err instanceof RuntimeException)
-            {
-                throw (RuntimeException)err;
+            return script.run(model);
+        } catch (Throwable err) {
+            if (callLogger.isDebugEnabled()) {
+                callLogger.debug(debugScriptName + " Exception", err);
             }
             throw new AlfrescoRuntimeException(err.getMessage(), err);
-        }*/
-        catch (Throwable err)
-        {
-            if (callLogger.isDebugEnabled())
-            {
-                callLogger.debug(debugScriptName+" Exception", err);
-            }
-            throw new AlfrescoRuntimeException(err.getMessage(), err);
-        }
-        finally
-        {
+        } finally {
             // Context.exit();
 
-            if (callLogger.isDebugEnabled())
-            {
+            if (callLogger.isDebugEnabled()) {
                 long endTime = System.nanoTime();
-                callLogger.debug(debugScriptName+" End " + (endTime - startTime)/1000000 + " ms");
+                callLogger.debug(debugScriptName + " End " + (endTime - startTime) / 1000000 + " ms");
             }
         }
     }
-
-    /**
-     * Converts the passed model into a Rhino model
-     *
-     * @param model     the model
-     *
-     * @return Map<String, Object> the converted model
-     */
-
-    /*
-    private Map<String, Object> convertToRhinoModel(Map<String, Object> model)
-    {
-    	Map<String, Object> newModel = null;
-    	if (model != null)
-    	{
-	        newModel = new HashMap<String, Object>(model.size());
-	        for (Map.Entry<String, Object> entry : model.entrySet())
-	        {
-	            if (entry.getValue() instanceof NodeRef)
-	            {
-	                newModel.put(entry.getKey(), new ScriptNode((NodeRef)entry.getValue(), this.services));
-	            }
-	            else
-	            {
-	                newModel.put(entry.getKey(), entry.getValue());
-	            }
-	        }
-    	}
-    	else
-    	{
-    		newModel = new HashMap<String, Object>(1, 1.0f);
-    	}
-        return newModel;
-    }
-    */
-
-
-    /**
-     * Rhino script value wraper
-     */
-    /*
-    private static class RhinoWrapFactory extends WrapFactory
-    {
-        public Scriptable wrapAsJavaObject(Context cx, Scriptable scope, Object javaObject, Class staticType)
-        {
-            if (javaObject instanceof Map && !(javaObject instanceof ScriptableHashMap))
-            {
-                return new NativeMap(scope, (Map)javaObject);
-            }
-            return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
-        }
-    }
-    */
-
-
-    /**
-     * Pre initializes two scope objects (one secure and one not) with the standard objects preinitialised.
-     * This saves on very expensive calls to reinitialize a new scope on every web script execution. See
-     * http://www.mozilla.org/rhino/scopes.html
-     *
-     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-     */
-    public void afterPropertiesSet() throws Exception
-    {
-        // Initialize the secure scope
-        /*
-        Context cx = Context.enter();
-        try
-        {
-            cx.setWrapFactory(wrapFactory);
-            this.secureScope = initScope(cx, false, true);
-        }
-        finally
-        {
-            Context.exit();
-        }
-
-        // Initialize the non-secure scope
-        cx = Context.enter();
-        try
-        {
-            cx.setWrapFactory(wrapFactory);
-            this.nonSecureScope = initScope(cx, true, true);
-        }
-        finally
-        {
-            Context.exit();
-        }
-        */
-    }
-
-    /**
-     * Initializes a scope for script execution. The easiest way to embed Rhino is just to create a new scope this
-     * way whenever you need one. However, initStandardObjects() is an expensive method to call and it allocates a
-     * fair amount of memory.
-     *
-     * @param cx        the thread execution context
-     * @param secure    Do we consider the script secure? When <code>false</code> this ensures the script may not
-     *                  access insecure java.* libraries or import any other classes for direct access - only the
-     *                  configured root host objects will be available to the script writer.
-     * @param sealed    Should the scope be sealed, making it immutable? This should be <code>true</code> if a scope
-     *                  is to be reused.
-     * @return the scope object
-     */
-    /*
-    protected Scriptable initScope(Context cx, boolean secure, boolean sealed)
-    {
-        Scriptable scope;
-        if (secure)
-        {
-            // Initialise the non-secure scope
-            // allow access to all libraries and objects, including the importer
-            // @see http://www.mozilla.org/rhino/ScriptingJava.html
-            scope = new ImporterTopLevel(cx, sealed);
-        }
-        else
-        {
-            // Initialise the secure scope
-            scope = cx.initStandardObjects(null, sealed);
-            // remove security issue related objects - this ensures the script may not access
-            // unsecure java.* libraries or import any other classes for direct access - only
-            // the configured root host objects will be available to the script writer
-            scope.delete("Packages");
-            scope.delete("getClass");
-            scope.delete("java");
-        }
-        return scope;
-    }
-
-    */
 }

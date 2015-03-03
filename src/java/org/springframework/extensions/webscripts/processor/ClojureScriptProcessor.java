@@ -131,7 +131,7 @@ public class ClojureScriptProcessor extends AbstractScriptProcessor {
             this.compiledWebScripts.put(path, webscript);
         }
 
-        return webscript.run(null, null, model);// scriptContent.getInputStream(), null, model);
+        return webscript.run(model);// scriptContent.getInputStream(), null, model);
     }
 
     /**

@@ -37,5 +37,5 @@ public interface WebScript {
      * @return The updated model
      */
     // TODO better documentation and type safety. Or just migrate everything to pure Clojure
-    Object run(Object inputStream, Object writer, Object model);
+    Object run(Object model);// ,  java.util.Map bindings
 }
