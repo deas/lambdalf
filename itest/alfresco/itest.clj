@@ -16,12 +16,13 @@
 (ns alfresco.itest
   (:use ;; [clojure.test]
         [clojure.tools.nrepl])
-  (:require [clj-http.client :as http]))
+  (:require [clj-http.client :as http])
+  (:import [it.sk.alfresco.clojure ContextHelper]))
 
-(def lambdalf-url "http://localhost:9090/alfresco")
+;; (def lambdalf-url "http://localhost:9090/alfresco")
 (def context-locations ["classpath:alfresco/application-context.xml" "classpath:alfresco/extension/no-jetty-ctx.xml"])
 (defonce nrepl-started (atom false))
-(defonce context-started (atom false))
+;; (defonce context-started (atom false))
 
 (defn http-method
   "Resolves an HTTP method keyword such as :GET or :POST into its implementation fn. Input method is not case sensitive."
@@ -32,13 +33,13 @@
        (symbol "clj-http.client")
        resolve))
 
-(defn call-wscript
-  ([path]
-     (call-wscript path :get))
-  ([path method]
-     (let [method (http-method method)
-           url (str lambdalf-url "/service" path)]
-       (method url {:basic-auth ["admin" "admin"]}))))
+;; (defn call-wscript
+;;   ([lambdalf-url path]
+;;      (call-wscript path :get))
+;;   ([lambdalf-url path method]
+;;      (let [method (http-method method)
+;;            url (str lambdalf-url "/service" path)]
+;;        (method url {:basic-auth ["admin" "admin"]}))))
 
 ;; (defn start-nrepl []
 ;;   (call-wscript "/clojure/nrepl" :post))
@@ -56,19 +57,15 @@
   (println "Initializing application context")
   (org.alfresco.util.ApplicationContextHelper/getApplicationContext (into-array String context-locations)))
 
-
-(defn start-jetty
-  "Starts jetty ... someday"
-  []
-  ;; (run-jetty app {:port 50505})
-  )
-
 (defn ensure-context
   "Ensures Application context is initialized only once"
   []
-  (when (not @context-started)
-    (create-application-context)
-    (reset! context-started true)))
+  (when (not (ContextHelper/getApplicationContext))
+    (create-application-context))
+  ;; (when (not @context-started)
+  ;;   (create-application-context)
+  ;;   (reset! context-started true))
+  )
 
 ;; ; copied from NREPL test sources
 ;; (defmacro defftest

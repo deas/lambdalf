@@ -4,5 +4,7 @@
 (w/create-script
  (fn [model]
    (log/info "Works!")
-   ;; (.log logger "Yo")
-   {"more" "stuff"})) ;; // No keywords for java
+   (.get model "document")
+   ;; // No keywords for java, value goes to nirvana for basic scripts
+   {"more" "stuff"}
+ :webscript false))

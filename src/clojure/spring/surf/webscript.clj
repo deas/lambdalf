@@ -65,17 +65,12 @@
                          vec)
                '~(conj forms 'do))))
 
-(defmacro create-webscript
-  "Create a webscript for the processor(s)."
-  [f]
-  `(reify spring.surf.webscript.WebScript
-     (run [~'this ~'model]
-       (merge-jmap-model ~'model (~f ~'model)))))
-
-
 (defmacro create-script
-  "Create a (basic) script for the processor(s)."
-  [f]
-  `(reify spring.surf.webscript.WebScript
-     (run [~'this ~'model]
-       (~f ~'model))))
+  "Create a (web)script for the processor(s)."
+  [f  & options]
+  (let [{:keys [webscript] :or {webscript true}} options]
+    `(reify spring.surf.webscript.WebScript
+       (run [~'this ~'model]
+         ~(if webscript
+            `(merge-jmap-model ~'model (~f ~'model))
+            `(~f ~'model))))))

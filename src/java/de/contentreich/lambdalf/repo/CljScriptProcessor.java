@@ -36,97 +36,32 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.FileCopyUtils;
 import spring.surf.webscript.WebScript;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 
-/*
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ImporterTopLevel;
-import org.mozilla.javascript.Script;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
-import org.mozilla.javascript.WrapFactory;
-import org.mozilla.javascript.WrappedException;
-*/
-
-/**
- * Implementation of the ScriptProcessor using the Rhino JavaScript library.
- *
- * @author Kevin Roast
- */
 public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor, ScriptResourceLoader/* , InitializingBean*/ {
     private static final Log logger = LogFactory.getLog(CljScriptProcessor.class);
     private static final Log callLogger = LogFactory.getLog(CljScriptProcessor.class.getName() + ".calls");
 
     private static final String PATH_CLASSPATH = "classpath:";
     private BaseProcessor rhinoProcessor;
-    /** Wrap Factory */
-    // private static final WrapFactory wrapFactory = new RhinoWrapFactory();
-
-    /**
-     * Base Value Converter
-     */
-    private final ValueConverter valueConverter = new ValueConverter();
-
-    /**
-     * Store into which to resolve cm:name based script paths
-     */
     private StoreRef storeRef;
-
-    /**
-     * Store root path to resolve cm:name based scripts path from
-     */
     private String storePath;
-
-    /** Pre initialized secure scope object. */
-    // private Scriptable secureScope;
-
-    /** Pre initialized non secure scope object. */
-    // private Scriptable nonSecureScope;
-
-    /**
-     * Flag to enable or disable runtime script compliation
-     */
     private boolean compile = true;
-
-    /** Flag to enable the sharing of sealed root scopes between scripts executions */
-    // private boolean shareSealedScopes = true;
-
-    /**
-     * Cache of runtime compiled script instances
-     */
-    // private final Map<String, Script> scriptCache = new ConcurrentHashMap<String, Script>(256);
     private final Map<String, WebScript> scriptCache = new ConcurrentHashMap<String, WebScript>(256);
-    ;
 
-
-    /**
-     * Set the default store reference
-     *
-     * @param storeRef The default store reference
-     */
     public void setStoreUrl(String storeRef) {
         this.storeRef = new StoreRef(storeRef);
     }
-
-    /**
-     * @param storePath The store path to set.
-     */
     public void setStorePath(String storePath) {
         this.storePath = storePath;
     }
-
-    /**
-     * @param compile the compile flag to set
-     */
     public void setCompile(boolean compile) {
         this.compile = compile;
     }
@@ -134,10 +69,6 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     public void setRhinoProcessor(BaseProcessor rhinoProcessor) {
         this.rhinoProcessor = rhinoProcessor;
     }
-
-    /**
-     * @see org.alfresco.service.cmr.repository.ScriptProcessor#reset()
-     */
     public void reset() {
         this.scriptCache.clear();
     }
@@ -152,9 +83,7 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
         }
     }
 
-    /**
-     * @see org.alfresco.service.cmr.repository.ScriptProcessor#execute(org.alfresco.service.cmr.repository.ScriptLocation, java.util.Map)
-     */
+    @Override
     public Object execute(ScriptLocation location, Map<String, Object> model) {
         try {
             // test the cache for a pre-compiled script matching our path
@@ -166,32 +95,10 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
             if (script == null) {
                 if (logger.isDebugEnabled())
                     logger.debug("Resolving and compiling script path: " + path);
-
-                // retrieve script content and resolve imports
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-                // FileCopyUtils.copy(location.getInputStream(), os);  // both streams are closed
-                // byte[] bytes = os.toByteArray();
-                // String source = new String(bytes, "UTF-8");
-                // source = resolveScriptImports(new String(bytes));
-
-                // compile the script and cache the result
-                // Context cx = Context.enter();
-                try {
                     script = compileClojureScript(location.getInputStream());
-                    ;// cx.compileString(source, location.toString(), 1, null);
-
-                    // We do not worry about more than one user thread compiling the same script.
-                    // If more than one request thread compiles the same script and adds it to the
-                    // cache that does not matter - the results will be the same. Therefore we
-                    // rely on the ConcurrentHashMap impl to deal both with ensuring the safety of the
-                    // underlying structure with asynchronous get/put operations and for fast
-                    // multi-threaded access to the common cache.
                     if (this.compile && location.isCachable()) {
                         this.scriptCache.put(path, script);
                     }
-                } finally {
-                    // Context.exit();
-                }
             }
 
             String debugScriptName = null;
@@ -230,13 +137,7 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
             }
 
             // compile the script based on the node content
-            WebScript script;
-            // Context cx = Context.enter();
-            try {
-                script = compileClojureScript(cr.getContentInputStream());// cx.compileString(resolveScriptImports(cr.getContentString()), nodeRef.toString(), 1, null);
-            } finally {
-                // Context.exit();
-            }
+            WebScript script  = compileClojureScript(cr.getContentInputStream());// cx.compileString(resolveScriptImports(cr.getContentString()), nodeRef.toString(), 1, null);
 
             return executeScriptImpl(script, model/*, false*/, nodeRef.toString());
         } catch (Throwable err) {
@@ -250,41 +151,11 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     public Object executeString(String source, Map<String, Object> model) {
         try {
             // compile the script based on the node content
-            WebScript script;
-            // Context cx = Context.enter();
-            try {
-                script = null;// cx.compileString(resolveScriptImports(source), "AlfrescoJS", 1, null);
-            } finally {
-                // Context.exit();
-            }
+            WebScript script = compileClojureScript(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)));
             return executeScriptImpl(script, model/*, true*/, "string script");
         } catch (Throwable err) {
             throw new ScriptException("Failed to execute supplied script: " + err.getMessage(), err);
         }
-    }
-
-    /**
-     * Resolve the imports in the specified script. Supported include directives are of the following form:
-     * <pre>
-     * &lt;import resource="classpath:alfresco/includeme.js"&gt;
-     * &lt;import resource="workspace://SpacesStore/6f73de1b-d3b4-11db-80cb-112e6c2ea048"&gt;
-     * &lt;import resource="/Company Home/Data Dictionary/Scripts/includeme.js"&gt;
-     * </pre>
-     * Either a classpath resource, NodeRef or cm:name path based script can be includes. Multiple includes
-     * of the same script are dealt with correctly and nested includes of scripts is fully supported.
-     * <p/>
-     * Note that for performance reasons the script import directive syntax and placement in the file
-     * is very strict. The import lines <i>must</i> always be first in the file - even before any comments.
-     * Immediately that the script service detects a non-import line it will assume the rest of the
-     * file is executable script and no longer attempt to search for any further import directives. Therefore
-     * all imports should be at the top of the script, one following the other, in the correct syntax and with
-     * no comments present - the only separators valid between import directives is white space.
-     *
-     * @param script The script content to resolve imports in
-     * @return a valid script with all nested includes resolved into a single script instance
-     */
-    private String resolveScriptImports(String script) {
-        return ScriptResourceHelper.resolveScriptImports(script, this, logger);
     }
 
     /**
@@ -405,8 +276,6 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
             }
             throw new AlfrescoRuntimeException(err.getMessage(), err);
         } finally {
-            // Context.exit();
-
             if (callLogger.isDebugEnabled()) {
                 long endTime = System.nanoTime();
                 callLogger.debug(debugScriptName + " End " + (endTime - startTime) / 1000000 + " ms");
