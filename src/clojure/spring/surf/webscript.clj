@@ -39,37 +39,10 @@
     model
     ))
 
-;; (defmacro let-map [vars & forms]
-;;   "Set up bindings for the entire map. Yes, that may look dangerous and bad, but
-;;  it makes sense. Trust me."
-;;   `(eval (list 'let (->> ~vars
-;;                          keys
-;;                          (map (fn [sym#] ([(-> sym# name symbol) (~vars sym#)])))
-;;                          (apply concat)
-;;                          vec)
-;;                '~(conj forms 'do))))
-
 ;; Ugh! :()
 ;; (defn js-ext [name]
 ;;   (-> (c/getbean "javaScriptProcessor")
 ;;       ()))
-
-;; (defmacro let-jmap [vars & forms]
-;;   "Set up bindings for the entire map. Yes, that may look dangerous and bad. It
-;;  makes sense. Trust me."
-;;   (let [model ~vars])
-;;   `(eval
-;;       (list 'let (->> ~vars
-;;                       .entrySet
-;;                       (map (fn [sym#] [(-> sym# .getKey symbol)
-;;                                        (.get ~vars (.getValue sym#))]))
-;;                       ;; (.get ~vars (.getKey sym#))]))
-;;                       ;; (.getValue sym#)
-;;                       (cons [(symbol "model") ~vars])
-;;                       (apply concat)
-;;                       vec)
-;;             '~(conj forms 'do)))
-;;   )
 
 (defmacro let-jmap [vars & forms]
   "Set up bindings for the entire map. Yes, that may look dangerous and bad. It
@@ -78,27 +51,12 @@
     (list 'let (->> ~vars
                     .entrySet
                     (map (fn [sym#] [(-> sym# .getKey symbol)
-                                     (list '.get
-                                           (symbol "model")
-                                           (.getKey sym#))]))
+                                     (list '.get (symbol "model") (.getKey sym#))]))
                     (cons [(symbol "model") '~vars])
                     (apply concat)
                     vec)
-          '~(conj forms 'do))))
-
-;; )
-
-;; (defmacro let-jmap2 [vars & forms]
-;;   "Set up bindings for the entire map. Yes, that may look dangerous and bad. It
-;;  makes sense. Trust me."
-;;   `(list 'let (->> ~vars
-;;                    .entrySet
-;;                    (map (fn [sym#] [(-> sym# .getKey symbol)
-;;                                     (.getValue sym#)]))
-;;                    (apply concat)
-;;                    vec)
-;;                '~(conj forms 'do)))
-
+          '~(conj forms 'do))
+    ))
 
 (defmacro create-script
   "Create a (web)script for the processor(s)."
@@ -107,7 +65,6 @@
     `(reify spring.surf.webscript.WebScript
        (run [~'this ~'model]
          ;; Wrap bindings
-         ;; (let [~'model ~'model]
          (let-jmap ~'model
            ~(if webscript
               `(merge-jmap-model ~'model (~f))
