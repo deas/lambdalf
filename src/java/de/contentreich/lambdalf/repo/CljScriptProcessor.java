@@ -22,10 +22,8 @@ import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.processor.ProcessorExtension;
 import org.alfresco.repo.jscript.ClasspathScriptLocation;
-import org.alfresco.repo.jscript.ValueConverter;
 import org.alfresco.repo.processor.BaseProcessor;
 import org.alfresco.scripts.ScriptException;
-import org.alfresco.scripts.ScriptResourceHelper;
 import org.alfresco.scripts.ScriptResourceLoader;
 import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.model.FileNotFoundException;
@@ -34,15 +32,12 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.FileCopyUtils;
-import spring.surf.webscript.WebScript;
+import spring.surf.webscript.Script;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor, ScriptResourceLoader/* , InitializingBean*/ {
@@ -54,7 +49,7 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     private StoreRef storeRef;
     private String storePath;
     private boolean compile = true;
-    private final Map<String, WebScript> scriptCache = new ConcurrentHashMap<String, WebScript>(256);
+    private final Map<String, Script> scriptCache = new ConcurrentHashMap<String, Script>(256);
 
     public void setStoreUrl(String storeRef) {
         this.storeRef = new StoreRef(storeRef);
@@ -73,11 +68,11 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
         this.scriptCache.clear();
     }
 
-    protected WebScript compileClojureScript(InputStream is) {
+    protected Script compileClojureScript(InputStream is) {
         // this.addProcessorModelExtensions(model);
 
         try {
-            return (WebScript) clojure.lang.Compiler.load(new InputStreamReader(is));
+            return (Script) clojure.lang.Compiler.load(new InputStreamReader(is));
         } catch (Exception exception) {
             throw new org.springframework.extensions.surf.core.scripts.ScriptException("Error executing Clojure script", exception);
         }
@@ -87,7 +82,7 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     public Object execute(ScriptLocation location, Map<String, Object> model) {
         try {
             // test the cache for a pre-compiled script matching our path
-            WebScript script = null;
+            Script script = null;
             String path = location.getPath();
             if (this.compile && location.isCachable()) {
                 script = this.scriptCache.get(path);
@@ -137,7 +132,7 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
             }
 
             // compile the script based on the node content
-            WebScript script  = compileClojureScript(cr.getContentInputStream());// cx.compileString(resolveScriptImports(cr.getContentString()), nodeRef.toString(), 1, null);
+            Script script  = compileClojureScript(cr.getContentInputStream());// cx.compileString(resolveScriptImports(cr.getContentString()), nodeRef.toString(), 1, null);
 
             return executeScriptImpl(script, model/*, false*/, nodeRef.toString());
         } catch (Throwable err) {
@@ -151,7 +146,7 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     public Object executeString(String source, Map<String, Object> model) {
         try {
             // compile the script based on the node content
-            WebScript script = compileClojureScript(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)));
+            Script script = compileClojureScript(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)));
             return executeScriptImpl(script, model/*, true*/, "string script");
         } catch (Throwable err) {
             throw new ScriptException("Failed to execute supplied script: " + err.getMessage(), err);
@@ -252,7 +247,7 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
      * @return result of the script execution, can be null.
      * @throws AlfrescoRuntimeException
      */
-    private Object executeScriptImpl(WebScript script, Map<String, Object> model/*, boolean secure*/, String debugScriptName)
+    private Object executeScriptImpl(Script script, Map<String, Object> model/*, boolean secure*/, String debugScriptName)
             throws AlfrescoRuntimeException {
         long startTime = 0;
         if (callLogger.isDebugEnabled()) {
@@ -269,7 +264,7 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
                 model.put(ex.getExtensionName(), ex);
             }
             */
-            return script.run(model);
+            return script.run(model,  this.processorExtensions);
         } catch (Throwable err) {
             if (callLogger.isDebugEnabled()) {
                 callLogger.debug(debugScriptName + " Exception", err);

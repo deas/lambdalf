@@ -32,41 +32,58 @@
 (defn merge-jmap-model
   "Updates the view-model with the provided one"
   [model view-model]
-  ;; (println (nil? model) " " (nil? view-model) " - " model " - " view-model)
-  ;; (log/debug "Merging back into view model")
-  (let [view-model-orig (.get model "model")]
-    (.putAll view-model-orig (k2s view-model))
-    model
-    ))
+  (doto model
+    (.putAll (k2s view-model))))
 
 ;; Ugh! :()
 ;; (defn js-ext [name]
 ;;   (-> (c/getbean "javaScriptProcessor")
 ;;       ()))
 
-(defmacro let-jmap [vars & forms]
-  "Set up bindings for the entire map. Yes, that may look dangerous and bad. It
- makes sense. Trust me."
-  `(eval
-    (list 'let (->> ~vars
-                    .entrySet
-                    (map (fn [sym#] [(-> sym# .getKey symbol)
-                                     (list '.get (symbol "model") (.getKey sym#))]))
-                    (cons [(symbol "model") '~vars])
-                    (apply concat)
-                    vec)
-          '~(conj forms 'do))
-    ))
+;; We keep it here as a ref for now :)
+;; (defmacro let-jmap [vars & forms]
+;;   "Set up bindings for the entire map. Yes, that may look dangerous and bad. It
+;;  makes sense. Trust me."
+;;   `;;  (with-local-vars [var ~vars]
+;;    ;; (deref var)
+;;   (let [~'m ~vars]
+;;        (eval
+;;         (list 'let (->> ~vars
+;;                         .entrySet
+;;                         (map (fn [sym#] [(-> sym# .getKey symbol)
+;;                                          (list '.get (symbol "m") (.getKey sym#))]))
+;;                         (cons [(symbol "m") '~vars])
+;;                         (apply concat)
+;;                         vec)
+;;               '~(conj forms 'do))
+;;         ));;)
+;;      ;;)
+;;   )
 
 (defmacro create-script
-  "Create a (web)script for the processor(s)."
-  [f  & options]
-  (let [{:keys [webscript] :or {webscript true}} options]
-    `(reify spring.surf.webscript.WebScript
-       (run [~'this ~'model]
-         ;; Wrap bindings
-         (let-jmap ~'model
-           ~(if webscript
-              `(merge-jmap-model ~'model (~f))
-              `(~f)))
-         ))))
+  "Create a script."
+  [f]
+  `(reify spring.surf.webscript.Script
+     (run [~'this ~'model ~'extensions]
+       (let [{:keys [~'document ~'space]
+              :or [~'document nil ~'space nil]}
+             (into {}
+                   (->> ~'model
+                        .entrySet
+                        (map (fn[sym#] [(-> sym# .getKey keyword)
+                                        (.getValue sym#)]))))]
+         (~f)))))
+
+
+(defmacro create-webscript
+  "Create a webscript."
+  [f]
+  `(reify spring.surf.webscript.Script
+     (run [~'this ~'model ~'extensions]
+       (let [{:keys [~'model]}
+             (into {}
+                   (->> ~'model
+                        .entrySet
+                        (map (fn[sym#] [(-> sym# .getKey keyword)
+                                        (.getValue sym#)]))))]
+         (merge-jmap-model ~'model (~f))))))

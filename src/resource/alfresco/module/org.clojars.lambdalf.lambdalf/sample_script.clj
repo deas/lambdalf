@@ -2,9 +2,7 @@
          '[clojure.tools.logging :as log])
 
 (w/create-script
- (fn [model]
-   (log/info "Works!")
-   (.get model "document")
-   ;; // No keywords for java, value goes to nirvana for basic scripts
-   {"more" "stuff"}
+ (fn []
+   (log/info "Works! Document : " document)
+   ;; return value goes to nirvana for basic scripts
  :webscript false))

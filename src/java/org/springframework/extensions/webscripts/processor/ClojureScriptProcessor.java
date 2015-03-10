@@ -24,17 +24,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import clojure.lang.RT;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.extensions.surf.core.scripts.ScriptException;
 import org.springframework.extensions.webscripts.ScriptContent;
 
-import spring.surf.webscript.WebScript;
+import spring.surf.webscript.Script;
 
 /**
  * Loads Clojure script controllers from an {@link InputStream} and memoizes
- * the compiled {@link WebScript} instance
+ * the compiled {@link spring.surf.webscript.Script} instance
  *
  * @author Carlo Sciolla &lt;skuro@skuro.tk&gt;
  */
@@ -49,8 +48,8 @@ public class ClojureScriptProcessor extends AbstractScriptProcessor {
 
     private static final Log log = LogFactory.getLog(ClojureScriptProcessor.class);
 
-    private Map<String, WebScript> compiledWebScripts =
-            Collections.synchronizedMap(new HashMap<String,WebScript>());
+    private Map<String, Script> compiledWebScripts =
+            Collections.synchronizedMap(new HashMap<String,Script>());
 
     /**
      * {@inheritDoc}
@@ -76,13 +75,13 @@ public class ClojureScriptProcessor extends AbstractScriptProcessor {
      * @return WebScript  a new instance of the requested Clojure backed web script
      */
     @SuppressWarnings(value = "unchecked")
-    protected WebScript compileClojureScript(InputStream is, Map<String, Object> model) {
+    protected Script compileClojureScript(InputStream is, Map<String, Object> model) {
         log.debug("Executing Clojure script");
 
         this.addProcessorModelExtensions(model);
 
         try {
-            return (WebScript) clojure.lang.Compiler.load(new InputStreamReader(is));
+            return (Script) clojure.lang.Compiler.load(new InputStreamReader(is));
         } catch (Exception exception) {
             throw new ScriptException("Error executing Clojure script", exception);
         }
@@ -113,7 +112,7 @@ public class ClojureScriptProcessor extends AbstractScriptProcessor {
      */
     public Object executeScript(ScriptContent scriptContent, Map<String, Object> model) {
         String path  = scriptContent.getPath();
-        WebScript webscript = this.compiledWebScripts.get(path);
+        Script webscript = this.compiledWebScripts.get(path);
         if (webscript == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Compiling new Clojure webscript at path " + path);
@@ -130,8 +129,8 @@ public class ClojureScriptProcessor extends AbstractScriptProcessor {
             }
             this.compiledWebScripts.put(path, webscript);
         }
-
-        return webscript.run(model);// scriptContent.getInputStream(), null, model);
+        // FIXME : For now we do not care about the model beeing  in the extensions map
+        return webscript.run(model.get("model"), model);// scriptContent.getInputStream(), null, model);
     }
 
     /**
@@ -146,6 +145,6 @@ public class ClojureScriptProcessor extends AbstractScriptProcessor {
      */
     public void reset() {
         init();
-        this.compiledWebScripts = Collections.synchronizedMap(new HashMap<String,WebScript>());
+        this.compiledWebScripts = Collections.synchronizedMap(new HashMap<String,Script>());
     }
 }
