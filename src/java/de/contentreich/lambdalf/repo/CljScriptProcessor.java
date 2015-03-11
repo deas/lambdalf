@@ -71,10 +71,13 @@ public class CljScriptProcessor extends BaseProcessor implements ScriptProcessor
     protected Script compileClojureScript(InputStream is) {
         // this.addProcessorModelExtensions(model);
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("Processing script : " + new java.util.Scanner(is).useDelimiter("\\A").next());
+        }
         try {
             return (Script) clojure.lang.Compiler.load(new InputStreamReader(is));
         } catch (Exception exception) {
-            throw new org.springframework.extensions.surf.core.scripts.ScriptException("Error executing Clojure script", exception);
+            throw new org.springframework.extensions.surf.core.scripts.ScriptException("Error executing Clojure script " + exception.getMessage(), exception);
         }
     }
 

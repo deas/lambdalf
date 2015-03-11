@@ -17,7 +17,7 @@
                          (srch/query "PATH:\"/*\" AND TYPE:\"cm:folder\"")))
           script-model (doto (java.util.HashMap.)
                          (.put "document" company-home))
-          clj-script "(w/create-script (fn [] document)))"]
+          clj-script "(require '[spring.surf.webscript :as w])(w/create-script (fn [] document))"]
       (= company-home (.executeScriptString script-service "clojure" clj-script script-model))) => true
     )
   )
