@@ -1,4 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!--
+ Hooking into alfresco share
+  -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:p="http://www.springframework.org/schema/p"
@@ -8,23 +11,6 @@
                            http://www.springframework.org/schema/util
                            http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
-    <!--
-     could potentially use two initializers
-     subsystem properties resource override
-      -->
-    <!--bean id="lambdalf.subsys.init" parent="clojure_fact">
-        <constructor-arg value='${lambdalf-init}'/>
-        <constructor-arg value='${lambdalf-init.ressource}'/>
-    </bean-->
-
-    <!--
-     alfresco defaults override
-     We want all things reloadable and participate in lifecyle
-     -->
-    <bean id="lambdalf.subsys.init" parent="clojure_fact">
-        <constructor-arg value='${lambdalf-init}'/>
-        <constructor-arg value='${lambdalf-init.ressource}'/>
-    </bean>
-
+    <import resource="classpath:/contentreich/clojure-context.xml"/>
 
 </beans>

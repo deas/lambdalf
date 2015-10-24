@@ -1,4 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!-- Alfresco bare root context beans -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:p="http://www.springframework.org/schema/p"
@@ -8,16 +9,19 @@
                            http://www.springframework.org/schema/util
                            http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
-  <bean id="webscripts.clj.scriptprocessor.factory"
-        class="org.springframework.extensions.webscripts.processor.ClojureScriptProcessorFactory"/>
+    <import resource="classpath:/contentreich/clojure-context.xml"/>
 
-  <!-- The first three stay until we either start up webscripts or find a convient way to weed it out for the subsys -->
-  <bean id="lambdalf.clj.registrar" class="org.springframework.extensions.webscripts.ScriptProcessorRegistrar" init-method="init">
-    <property name="registry"  ref="webscripts.repo.registry.scriptprocessor"/>
-    <property name="factory"   ref="webscripts.clj.scriptprocessor.factory"/>
-    <property name="name"      value="Clojure Script Processor"/>
-    <property name="extension" value="clj"/>
-  </bean>
+    <bean id="webscripts.clj.scriptprocessor.factory"
+          class="org.springframework.extensions.webscripts.processor.ClojureScriptProcessorFactory"/>
+
+    <!-- The first three stay until we either start up webscripts or find a convient way to weed it out for the subsys -->
+    <bean id="lambdalf.clj.registrar" class="org.springframework.extensions.webscripts.ScriptProcessorRegistrar"
+          init-method="init">
+        <property name="registry" ref="webscripts.repo.registry.scriptprocessor"/>
+        <property name="factory" ref="webscripts.clj.scriptprocessor.factory"/>
+        <property name="name" value="Clojure Script Processor"/>
+        <property name="extension" value="clj"/>
+    </bean>
 
     <bean id="cljScriptProcessor" class="de.contentreich.lambdalf.repo.CljScriptProcessor" init-method="register">
         <property name="name" value="clojure"/>
@@ -28,15 +32,19 @@
         <property name="serviceRegistry" ref="ServiceRegistry"/>
         <property name="rhinoProcessor" ref="javaScriptProcessor"/>
         <property name="storeUrl" value="${spaces.store}"/>
-        <property name="storePath"  value="${spaces.company_home.childname}"/>
+        <property name="storePath" value="${spaces.company_home.childname}"/>
     </bean>
 
+    <!-- Weeding out defaults because we want it in sub-context -->
+    <bean id="lambdalf.init" abstract="true"><!-- parent="clojure_fact" -->
+        <!--constructor-arg value='cr_init.clj'/>
+        <constructor-arg value='true'/-->
+    </bean>
 
-  <bean id="lambdalf.ContextHelper" class="it.sk.alfresco.clojure.ContextHelper"/>
-
-  <!-- Import application contexts from dedicated sub-directory. -->
-  <bean id="lambdalf" class="org.alfresco.repo.management.subsystems.ChildApplicationContextFactory" parent="abstractPropertyBackedBean">
-      <property name="autoStart" value="true"/>
-  </bean>
+    <!-- Import application contexts from dedicated sub-directory. -->
+    <bean id="lambdalf" class="org.alfresco.repo.management.subsystems.ChildApplicationContextFactory"
+          parent="abstractPropertyBackedBean">
+        <property name="autoStart" value="true"/>
+    </bean>
 
 </beans>

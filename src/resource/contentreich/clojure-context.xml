@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://www.springframework.org/schema/util
+                           http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+    <bean id="lambdalf.ContextHelper" class="it.sk.alfresco.clojure.ContextHelper"/>
+
+    <!-- Credits to https://github.com/henrik42/spring-break -->
+    <bean id="clojure_fact"
+          abstract="true"
+          factory-bean="clojure_factory"
+          factory-method="new_instance"/>
+
+    <bean id="clojure_factory"
+          class="clojure.lang.Compiler"
+          factory-method="load"
+          depends-on="lambdalf.ContextHelper">
+        <constructor-arg>
+            <bean class="java.io.StringReader">
+                <constructor-arg
+                        value="(require 'spring-break.factories)
+                     spring-break.factories/clojure-object-factory"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <!-- defaults overriden in lambdalf-context.xml -->
+    <bean id="lambdalf.init" parent="clojure_fact">
+        <constructor-arg value='cr_init.clj'/>
+        <constructor-arg value='true'/>
+    </bean>
+
+</beans>
