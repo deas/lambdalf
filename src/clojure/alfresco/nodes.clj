@@ -14,7 +14,8 @@
 ;; limitations under the License.
 
 (ns alfresco.nodes
-  (:require [alfresco.core :as c]
+  (:require [clojure.zip :as z]
+            [alfresco.core :as c]
             [alfresco.model :as m]
             [alfresco.search :as s]
             [alfresco.auth :as a])
@@ -60,7 +61,8 @@
   (add-aspect! [this aspect props] "Adds an aspect to a node.")
   (del-aspect! [this aspect] "Removes an aspect from a node")
   (type-qname [this] "Returns the qname of the provided node's type")
-  (set-type! [this type] "Sets the provided type onto the node. Yields nil"))
+  (set-type! [this type] "Sets the provided type onto the node. Yields nil")
+  (mime-type [this] "Gives the mime-type"))
 
 (defn company-home
   "Returns the 'Company Home' node."
@@ -184,4 +186,42 @@
 
   (set-type!
    [type node]
-    (.setType (node-service) node (m/qname type))))
+    (.setType (node-service) node (m/qname type)))
+
+   (mime-type
+     [node]
+     (if-let [content (property node ContentModel/PROP_CONTENT)]
+       (.getMimetype content)
+       nil)))
+
+(defn to-seq
+  "Returns a lazy seq of the nodes representing the repository branch
+having the given root. Uses the currently authenticated user to realize
+the seq."
+  [root]
+  ;; store the currently authenticated user, needed by the following closures
+  (let [user (a/whoami)
+        branch? (fn [x] (a/run-as user
+                                  (m/qname-isa? (type-qname x)
+                                                (m/qname :cm/folder))))
+        children (fn [x] (a/run-as user
+                                   (children x)))]
+    (tree-seq branch? children root)))
+
+(defn branch?
+  "Verifies if the current location can have children.
+   While cm:content can have children, this is currently limited to cm:folder"
+  [node]
+  (m/qname-isa? "cm:folder" (type-qname node)))
+
+(defn make-node
+  "Associates the given children with the given parent node"
+  [node children]
+  (apply create-child-assoc node children)
+  node)
+
+(defn repo-zip
+  "Creates a zipper with the given node as root"
+  [root]
+  (let [children #(seq (children %))]
+    (z/zipper branch? children make-node root)))
