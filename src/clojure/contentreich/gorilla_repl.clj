@@ -10,7 +10,7 @@
             [gorilla-repl.render-values-mw :as render-mw]   ;; it's essential this import comes after the previous one! It
     ;; refers directly to a var in nrepl (as a hack to workaround
     ;; a weakness in nREPL's middleware resolution).
-    ;; [cider.nrepl :as cider]
+            [cider.nrepl :as cider]
             [gorilla-repl.renderer :as renderer] ;; this is needed to bring the render implementations into scope
             [ring.util.response :as res]
             [clojure.tools.nrepl :as nrepl]
@@ -142,7 +142,7 @@
   (doall (map cc/generate-string response-seq)))
 
 (def ^:private nrepl-handler (apply server/default-handler
-                                    (-> '() ;;  (map resolve cider/cider-middleware)
+                                    (-> (map resolve cider/cider-middleware)
                                         (conj #'render-mw/render-values))))
 
 (defn process-message
