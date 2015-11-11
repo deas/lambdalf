@@ -19,10 +19,16 @@
             AuthenticationUtil$RunAsWork]))
 
 ; TODO memoize the result
+;;
 (defn admin
   "Returns the current Administrator user name."
   []
   (AuthenticationUtil/getAdminUserName))
+
+(defn admin
+  "Returns the current Administrator user name."
+  []
+  (AuthenticationUtil/getSystemUserName))
 
 (defmacro run-as
   "Runs the provided form while impersonating the given user.
@@ -32,8 +38,8 @@
   scope of the authorisation context (which is probably not what's intended)."
   [user & f]
   `(let [work# (reify AuthenticationUtil$RunAsWork
-                     (~'doWork [~'this]
-                               ~@f))]
+                 (~'doWork [~'this]
+                   ~@f))]
      (AuthenticationUtil/runAs work# ~user)))
 
 (defmacro run-as-fn
@@ -51,6 +57,15 @@
   scope of the authorisation context (which is probably not what's intended)."
   [& f]
   `(run-as (admin) ~@f))
+
+(defmacro as-system
+  "Runs the provided form as system.
+  WARNING: the form you pass to this macro should not return a lazy
+  sequence that include calls to repository functions, as when/if they are
+  eventually evaluated, the calls to those functions will occur outside the
+  scope of the authorisation context (which is probably not what's intended)."
+  [& f]
+  `(run-as (system) ~@f))
 
 (defn whoami
   "Returns the currently valid user name"
