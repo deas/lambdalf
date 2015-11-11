@@ -152,7 +152,7 @@
   ;; :amp-target-war    [org.alfresco/alfresco ~alfresco-version :extension "war"
   :javac-target      "1.7"
   ;; Beware !!! refactor-nrepl middleware can kick off midje integration tests!
-  :test-paths ["test"];; ["itest" "test"]
+  :test-paths ["itest" "test"];; ["itest" "test"]
 
   :injections [(require 'spyscope.core)]
   ;; http://www.jayway.com/2014/09/09/integration-testing-setup-with-midje-and-leiningen/
