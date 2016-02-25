@@ -14,8 +14,7 @@
             [gorilla-repl.renderer :as renderer] ;; this is needed to bring the render implementations into scope
             [ring.util.response :as res]
             [clojure.tools.nrepl :as nrepl]
-            [clojure.tools.nrepl [transport :as transport]
-             [server :as server]]
+            [clojure.tools.nrepl [transport :as transport]]
             [gorilla-repl.files :as files]
             [clojure.tools.logging :as log]
             [clojure.pprint :as pp]))
@@ -105,13 +104,13 @@
           ]
           A custom nREPL handler may be specified when creating the handler via
           :nrepl-handler.  The default
-          (via `(clojure.tools.nrepl.server/default-handler)`) is appropriate
+          (via `(clojure.tools.nrepl.nrepl-server/default-handler)`) is appropriate
           for textual REPL interactions, and includes support for interruptable
           evaluation, sessions, readably-printed evaluation values, and
           prompting for *in* input.  Please refer to the main nREPL documentation
           for details on semantics and message schemas for these middlewares."
          [& {:keys [nrepl-handler default-read-timeout cookie-name]
-             :or   {nrepl-handler        (server/default-handler)
+             :or   {nrepl-handler        (nrepl-server/default-handler)
                     default-read-timeout 0
                     cookie-name          "drawbridge-session"}}]
          ;; TODO heartbeat for continuous feeding mode
@@ -133,22 +132,22 @@
                      (response transport client
                                (do
                                  (when (:op msg)
-                                   (future (server/handle* msg nrepl-handler write)))
+                                   (future (nrepl-server/handle* msg nrepl-handler write)))
                                  (client)))))))
              (memory-session :cookie-name cookie-name)))
 
 (defn- response
-  [transport client response-seq]
+  [response-seq]
   (doall (map cc/generate-string response-seq)))
 
-(def ^:private nrepl-handler (apply server/default-handler
+(def ^:private nrepl-handler (apply nrepl-server/default-handler
                                     (-> (map resolve cider/cider-middleware)
                                         (conj #'render-mw/render-values))))
 
 (defn process-message
   "..."
   [msg store & {:keys [nrepl-handler read-timeout]
-                :or   {nrepl-handler (server/default-handler)
+                :or   {nrepl-handler (nrepl-server/default-handler)
                        read-timeout  1000}}]                ;; Long/MAX_VALUE -> Not what we want
   ;; TODO heartbeat for continuous feeding mode
   (log/info "Got handler" nrepl-handler)
@@ -157,10 +156,9 @@
                                            (::transport store)))
         client (nrepl/client read read-timeout)]
     (log/debug "Processing message " (with-out-str (pp/pprint msg) " response timeout = " read-timeout))
-    (response transport client
-              (do
+    (response (do
                 (when (:op msg)
-                  (future (server/handle* msg nrepl-handler write)))
+                  (future (nrepl-server/handle* msg nrepl-handler write)))
                 (client)))))
 
 (defn process-json-message

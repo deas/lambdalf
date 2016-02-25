@@ -25,7 +25,7 @@
   []
   (AuthenticationUtil/getAdminUserName))
 
-(defn admin
+(defn system
   "Returns the current Administrator user name."
   []
   (AuthenticationUtil/getSystemUserName))
