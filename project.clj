@@ -125,7 +125,7 @@
              :test     {:dependencies [
                                        [org.alfresco/alfresco-repository ~alfresco-version :classifier "h2scripts"]
                                        [com.h2database/h2 ~h2-version]
-                                       [clj-http "2.0.0"]
+                                       [clj-http "2.1.0"]
                                        [org.eclipse.jetty/jetty-server ~jetty-version]
                                        [org.eclipse.jetty.websocket/websocket-server ~jetty-version]
                                        [org.eclipse.jetty/jetty-webapp ~jetty-version]
