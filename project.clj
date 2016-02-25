@@ -53,7 +53,7 @@
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  ;; [com.gfredericks/debug-repl "0.0.7"]
-                 [spyscope "0.1.5"]
+                 ;; [spyscope "0.1.5"]
                  [evalive "1.1.0"]
                  [org.clojure/java.classpath "0.2.3"]
                  [org.clojure/java.jmx "0.3.1"]
@@ -69,7 +69,18 @@
                  [com.stuartsierra/component "0.3.1"]
                  ;; for gorilla websocket-relay
                  [cheshire "5.5.0"]
-                 [compojure "1.4.0"]
+
+                 ;; Weeding out deps here!
+                 [ring/ring-core "1.4.0" :exclusions [ring/ring-codec
+                                                      commons-fileupload
+                                                      crypto-random
+                                                      clj-time
+                                                      commons-io]]
+                 [clj-time "0.9.0" :exclusions [joda-time]]
+                 [ring/ring-codec "1.0.0" :exclusions [commons-codec]]
+                 [crypto-random "1.2.0" :exclusions [commons-codec]]
+                 [compojure "1.4.0"
+                  :exclusions [ring/ring-core]]
                  [gorilla-repl ~gorilla-repl-version :exclusions [http-kit org.slf4j/slf4j-api
                                                                   javax.servlet/servlet-api
                                                                   grimradical/clj-semver
@@ -108,22 +119,37 @@
                  }
 
   :profiles {:dev      {:plugins      [
-                                       [lein-midje "3.1.3"]
+                                       ;; [lein-midje "3.1.3"]
                                        ]                    ;;[lein-amp "0.3.0"]]}
                         :source-paths ["src/clojure"]       ;; "dev"
                         :dependencies [
-                                       [org.alfresco/alfresco-repository ~alfresco-version :classifier "h2scripts"]
+                                       [org.alfresco/alfresco-repository ~alfresco-version
+                                        :classifier "h2scripts"
+                                        :exclusions [
+                                                     commons-codec
+                                                     ;; commons-fileupload
+                                                     ]]
+                                       ;; [spyscope "0.1.5"]
                                        [com.h2database/h2 ~h2-version]
-                                       [clj-http "2.1.0"]
+                                       [clj-http "2.1.0"
+                                        :exclusions [
+                                                     commons-codec
+                                                     ]
+                                        ]
                                        [org.eclipse.jetty/jetty-server ~jetty-version]
                                        [org.eclipse.jetty.websocket/websocket-server ~jetty-version]
-                                       [midje "1.8.3"]
+                                       ;; [midje "1.8.3"]
                                        [org.eclipse.jetty/jetty-webapp ~jetty-version]
                                        [org.eclipse.jetty/jetty-util ~jetty-version]
                                        ]}
              ;;             :uberjar  { :aot :all }
              :test     {:dependencies [
-                                       [org.alfresco/alfresco-repository ~alfresco-version :classifier "h2scripts"]
+                                       [org.alfresco/alfresco-repository ~alfresco-version
+                                        :classifier "h2scripts"
+                                        :exclusions [
+                                                     ;; commons-codec
+                                                     ;; commons-fileupload
+                                                     ]]
                                        [com.h2database/h2 ~h2-version]
                                        [clj-http "2.1.0"]
                                        [org.eclipse.jetty/jetty-server ~jetty-version]
@@ -133,21 +159,42 @@
                                        [junit/junit ~junit-version-override]]}
              :provided {:dependencies [
                                        ;; [org.clojure/clojurescript "1.7.122"]
+                                       ;; We need to fiddle around with the deps so the clojure deps chain shows up
                                        [org.alfresco/alfresco-core ~alfresco-core-version
-                                        :exclusions [[commons-collections]]]
-                                       ;; override wrong dep from core causing RTE when starting up the context
-                                       [commons-collections "3.2.2"]
-                                       [org.alfresco/alfresco-data-model ~alfresco-version]
+                                        :exclusions [
+                                                     ;; commons-codec
+                                                     ;; joda-time
+                                                     ]]
+                                       [org.alfresco/alfresco-data-model ~alfresco-version
+                                        ;; :exclusions [org.apache.tika/tika-parsers]
+                                        ]
                                        [org.alfresco/alfresco-mbeans ~alfresco-version]
                                        [org.alfresco/alfresco-remote-api ~alfresco-version]
-                                       [org.alfresco/alfresco-repository ~alfresco-version]
+                                       [org.alfresco/alfresco-repository ~alfresco-version
+                                        :exclusions [commons-collections
+                                                     ;; commons-codec
+                                                     ;; joda-time
+                                                     ;; commons-fileupload
+                                                     ]]
 
                                        ;; You have to build the web-client yourself for now
                                        ;; "mvn -f pom-alfresco-web-client.xml install" in web-client/
                                        ;; [org.alfresco/alfresco-web-client                      ~alfresco-version]
                                        [org.springframework/spring-context ~spring-version]
                                        [org.springframework/spring-beans ~spring-version]
-                                       [org.springframework.extensions.surf/spring-webscripts ~spring-surf-version]
+                                       [org.springframework.extensions.surf/spring-webscripts ~spring-surf-version
+                                        :exclusions [
+                                                     ;; commons-fileupload
+                                                     ]]
+                                       ;; The deps alfresco really wants
+                                       ;; override wrong dep from core causing RTE when starting up the context
+
+                                       [commons-collections "3.2.2"]
+                                       ;;  Weeding out fileupload, joda, commons-io does not work - comes in via clj(!) deps
+                                       [commons-fileupload "1.3.1"]
+                                       [joda-time "2.8.1"]
+                                       [commons-io "2.4"]
+                                       [commons-codec "1.10"]
                                        [javax.websocket/javax.websocket-api ~websocket-version]
                                        [xml-apis/xml-apis ~xml-apis-version-override]]}
              }
@@ -161,7 +208,7 @@
   ;; Beware !!! refactor-nrepl middleware can kick off midje integration tests!
   :test-paths ["itest" "test"]                              ;; ["itest" "test"]
 
-  :injections [(require 'spyscope.core)]
+  ;; :injections [(require 'spyscope.core)]
   ;; http://www.jayway.com/2014/09/09/integration-testing-setup-with-midje-and-leiningen/
   :aliases {"itest" ["midje" ":filters" "it"]               ;;"src/clojure" "test" "itest"
             "test"  ["midje"]
