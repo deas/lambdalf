@@ -34,7 +34,7 @@
 ;; (def websocket-version "1.0")
 
 
-(defproject de.contentreich.lambdalf/lambdalf "1.9.999"
+(defproject org.clojars.deas/lambdalf "1.9.999"
   :title "lambdalf"
   :description "Lambdalf -- Clojure support for Alfresco, batteries included"
   :url "https://github.com/lambdalf/lambdalf"
@@ -48,7 +48,7 @@
   :dependencies [[org.clojure/tools.logging "0.3.1"]
                  [org.clojure/tools.namespace "0.2.10"]
                  [org.clojure/tools.trace "0.7.9"]
-                 [org.clojure/clojure "1.8.0"]
+                 [org.clojure/clojure "1.9.0-alpha13"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  ;; [com.gfredericks/debug-repl "0.0.7"]
                  ;; [spyscope "0.1.5"]
@@ -58,15 +58,16 @@
                  ;; schmetterling introduces deps conflicting with alfresco
                  ;; [schmetterling "0.0.8"]
                  ;; SNAPSHOTS do not build uberjars?
-                 [cider/cider-nrepl "0.11.0"#_~cider-nrepl-version]   ; 8.0-SNAPSHOT"]
-                 [refactor-nrepl "1.2.0"#_~refactor-nrepl-version]
+                 [cider/cider-nrepl "0.14.0" #_~cider-nrepl-version] ; 8.0-SNAPSHOT"]
+                 [refactor-nrepl "1.2.0" #_~refactor-nrepl-version]
                  ;; WARNING: do _not_ add test, provided or runtime dependencies
                  ;; here as they will be included in the uberjar, regardless of scope.
                  ;; See https://github.com/technomancy/leiningen/issues/741 for an
                  ;; explanation of why this occurs.
                  [com.stuartsierra/component "0.3.1"]
                  ;; for gorilla websocket-relay
-                 [cheshire "5.5.0"]
+                 [cheshire "5.5.0" :exclusions [*/*]]
+                 ;; jackson-core "2.5.3", alfresco jackson-core-2.3.2
 
                  ;; Weeding out deps here!
                  [ring/ring-core "1.4.0" :exclusions [ring/ring-codec
@@ -79,21 +80,22 @@
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
                  [compojure "1.4.0"
                   :exclusions [ring/ring-core]]
-                 [gorilla-repl "0.3.5-SNAPSHOT"#_~gorilla-repl-version :exclusions [http-kit org.slf4j/slf4j-api
-                                                                  javax.servlet/servlet-api
-                                                                  grimradical/clj-semver
-                                                                  ch.qos.logback/logback-classic
-                                                                  org.clojure/data.codec
-                                                                  org.clojure/tools.logging]] ;; A ton of deps :exclusions [com.sun.jdmk/jmxtools]
+                 [org.clojars.deas/gorilla-repl-ng "0.3.6-SNAPSHOT"
+                  :exclusions [*/*]
+                  #_[http-kit org.slf4j/slf4j-api
+                     javax.servlet/servlet-api
+                     grimradical/clj-semver
+                     ch.qos.logback/logback-classic
+                     org.clojure/data.codec
+                     org.clojure/tools.logging]]            ;; A ton of deps :exclusions [com.sun.jdmk/jmxtools]
                  [ring/ring-servlet "1.4.0"]
                  [ring/ring-json "0.4.0"]
                  ;; [parinfer/parinfer "0.1.0-SNAPSHOT" :exclusions [*]]
                  ]
-  :aot [contentreich.ring-servlet]
+  ;; :aot [contentreich.ring-servlet]
   :javac-options ["-target" "1.7" "-source" "1.7"]
-  :plugins [[cider/cider-nrepl "0.11.0"#_~cider-nrepl-version]
-            ;; [lein-gorilla "0.3.5-SNAPSHOT"#_~gorilla-repl-version]
-            [refactor-nrepl "1.2.0"#_~refactor-nrepl-version]
+  :plugins [[cider/cider-nrepl "0.14.0"]
+            [refactor-nrepl "1.2.0" #_~refactor-nrepl-version]
             ;; http://dev.clojure.org/jira/browse/NREPL-53
             ;; [com.gfredericks/nrepl-53-monkeypatch "0.1.0"]
             ;; [lein-cljsbuild "1.1.0"]
@@ -121,54 +123,54 @@
                                        ]                    ;;[lein-amp "0.3.0"]]}
                         :source-paths ["src/clojure"]       ;; "dev"
                         :dependencies [
-                                       [org.alfresco/alfresco-repository "5.1.e"#_~alfresco.version
+                                       [org.alfresco/alfresco-repository "5.1.e"
                                         :classifier "h2scripts"
                                         :exclusions [
                                                      commons-codec
                                                      ;; commons-fileupload
                                                      ]]
                                        ;; [spyscope "0.1.5"]
-                                       [com.h2database/h2 "1.4.190"#_~h2-version]
+                                       [com.h2database/h2 "1.4.190" #_~h2-version]
                                        [clj-http "2.1.0"
                                         :exclusions [
                                                      commons-codec
                                                      ]
                                         ]
-                                       [org.eclipse.jetty/jetty-server "9.2.11.v20150529"#_~jetty-version]
-                                       [org.eclipse.jetty.websocket/websocket-server "9.2.11.v20150529"#_~jetty-version]
+                                       [org.eclipse.jetty/jetty-server "9.2.11.v20150529"]
+                                       [org.eclipse.jetty.websocket/websocket-server "9.2.11.v20150529"]
                                        ;; [midje "1.8.3"]
-                                       [org.eclipse.jetty/jetty-webapp "9.2.11.v20150529"#_~jetty-version]
-                                       [org.eclipse.jetty/jetty-util "9.2.11.v20150529"#_~jetty-version]
+                                       [org.eclipse.jetty/jetty-webapp "9.2.11.v20150529"]
+                                       [org.eclipse.jetty/jetty-util "9.2.11.v20150529"]
                                        ]}
              ;;             :uberjar  { :aot :all }
              :test     {:dependencies [
-                                       [org.alfresco/alfresco-repository "5.1.e"#_~alfresco.version
+                                       [org.alfresco/alfresco-repository "5.1.e"
                                         :classifier "h2scripts"
                                         :exclusions [
                                                      ;; commons-codec
                                                      ;; commons-fileupload
                                                      ]]
-                                       [com.h2database/h2 "1.4.190"#_~h2-version]
+                                       [com.h2database/h2 "1.4.190" #_~h2-version]
                                        [clj-http "2.1.0"]
-                                       [org.eclipse.jetty/jetty-server "9.2.11.v20150529"#_~jetty-version]
-                                       [org.eclipse.jetty.websocket/websocket-server "9.2.11.v20150529"#_~jetty-version]
-                                       [org.eclipse.jetty/jetty-webapp "9.2.11.v20150529"#_~jetty-version]
-                                       [org.eclipse.jetty/jetty-util "9.2.11.v20150529"#_~jetty-version]
-                                       [junit/junit "4.11"#_~junit-version-override]]}
+                                       [org.eclipse.jetty/jetty-server "9.2.11.v20150529"]
+                                       [org.eclipse.jetty.websocket/websocket-server "9.2.11.v20150529"]
+                                       [org.eclipse.jetty/jetty-webapp "9.2.11.v20150529"]
+                                       [org.eclipse.jetty/jetty-util "9.2.11.v20150529"]
+                                       [junit/junit "4.11"]]}
              :provided {:dependencies [
                                        ;; [org.clojure/clojurescript "1.7.122"]
                                        ;; We need to fiddle around with the deps so the clojure deps chain shows up
-                                       [org.alfresco/alfresco-core "5.6"#_~alfresco-core-version
+                                       [org.alfresco/alfresco-core "5.6"
                                         :exclusions [
                                                      ;; commons-codec
                                                      ;; joda-time
                                                      ]]
-                                       [org.alfresco/alfresco-data-model "5.1.e"#_~alfresco.version
+                                       [org.alfresco/alfresco-data-model "5.1.e"
                                         ;; :exclusions [org.apache.tika/tika-parsers]
                                         ]
-                                       [org.alfresco/alfresco-mbeans "5.1.e"#_~alfresco.version]
-                                       [org.alfresco/alfresco-remote-api "5.1.e"#_~alfresco.version]
-                                       [org.alfresco/alfresco-repository "5.1.e"#_~alfresco.version
+                                       [org.alfresco/alfresco-mbeans "5.1.e"]
+                                       [org.alfresco/alfresco-remote-api "5.1.e"]
+                                       [org.alfresco/alfresco-repository "5.1.e"
                                         :exclusions [commons-collections
                                                      ;; commons-codec
                                                      ;; joda-time
@@ -178,9 +180,9 @@
                                        ;; You have to build the web-client yourself for now
                                        ;; "mvn -f pom-alfresco-web-client.xml install" in web-client/
                                        ;; [org.alfresco/alfresco-web-client                      "5.1.e"#_~alfresco.version]
-                                       [org.springframework/spring-context "3.2.14.RELEASE"#_~spring-version]
-                                       [org.springframework/spring-beans "3.2.14.RELEASE"#_~spring-version]
-                                       [org.springframework.extensions.surf/spring-webscripts "5.8"#_~spring-surf-version
+                                       [org.springframework/spring-context "3.2.14.RELEASE"]
+                                       [org.springframework/spring-beans "3.2.14.RELEASE"]
+                                       [org.springframework.extensions.surf/spring-webscripts "5.8"
                                         :exclusions [
                                                      ;; commons-fileupload
                                                      ]]
@@ -193,8 +195,8 @@
                                        [joda-time "2.8.1"]
                                        [commons-io "2.4"]
                                        [commons-codec "1.10"]
-                                       [javax.websocket/javax.websocket-api ~"1.0"#_~websocket-version]
-                                       [xml-apis/xml-apis "1.4.01"#_~xml-apis-version-override]]}
+                                       [javax.websocket/javax.websocket-api "1.0"]
+                                       [xml-apis/xml-apis "1.4.01"]]}
              }
   ;; :aot               [alfresco]
   :source-paths ["src/clojure"]
