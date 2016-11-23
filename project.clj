@@ -65,9 +65,6 @@
                  ;; See https://github.com/technomancy/leiningen/issues/741 for an
                  ;; explanation of why this occurs.
                  [com.stuartsierra/component "0.3.1"]
-                 ;; for gorilla websocket-relay
-                 [cheshire "5.5.0" :exclusions [*/*]]
-                 ;; jackson-core "2.5.3", alfresco jackson-core-2.3.2
 
                  ;; Weeding out deps here!
                  [ring/ring-core "1.4.0" :exclusions [ring/ring-codec
@@ -90,8 +87,22 @@
                      org.clojure/tools.logging]]            ;; A ton of deps :exclusions [com.sun.jdmk/jmxtools]
                  [ring/ring-servlet "1.4.0"]
                  [ring/ring-json "0.4.0"]
-                 ;; [parinfer/parinfer "0.1.0-SNAPSHOT" :exclusions [*]]
-                 ]
+                 [cheshire "5.5.0" :exclusions [*/*]]
+                 ;; for gorilla websocket-relay
+                 ;; jackson-core "2.5.3", alfresco jackson-core-2.3.2
+                 [com.fasterxml.jackson.dataformat/jackson-dataformat-smile "2.3.2"
+                  :exclusions [*/*]]
+                 [com.fasterxml.jackson.dataformat/jackson-dataformat-cbor "2.3.2"
+                  :exclusions [*/*]]
+                 [org.clojars.deas/gorilla-plot "0.2.0-SNAPSHOT"]
+                 [clojail "1.0.6"]
+                 ;; TODO Untangle those two in gorilla-repl
+                 [http-kit "2.2.0"]
+                 [grimradical/clj-semver "0.3.0"
+                  :exclusions [org.clojure/clojure]]
+                 [ring-cors "0.1.8"]
+                 [ring-middleware-format "0.7.0"]]
+  :aot [gorilla-repl.servlet]
   ;; :aot [contentreich.ring-servlet]
   :javac-options ["-target" "1.7" "-source" "1.7"]
   :plugins [[cider/cider-nrepl "0.14.0"]
@@ -196,8 +207,8 @@
                                        [commons-io "2.4"]
                                        [commons-codec "1.10"]
                                        [javax.websocket/javax.websocket-api "1.0"]
-                                       [xml-apis/xml-apis "1.4.01"]]}
-             }
+                                       [javax.servlet/javax.servlet-api "3.1.0"]
+                                       [xml-apis/xml-apis "1.4.01"]]}}
   ;; :aot               [alfresco]
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java"]
