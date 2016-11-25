@@ -86,22 +86,28 @@
                      org.clojure/data.codec
                      org.clojure/tools.logging]]            ;; A ton of deps :exclusions [com.sun.jdmk/jmxtools]
                  [ring/ring-servlet "1.4.0"]
-                 [ring/ring-json "0.4.0"]
-                 [cheshire "5.5.0" :exclusions [*/*]]
+                 [org.clojure/data.json "0.2.6"]
+                 ;; [ring/ring-json "0.4.0"]
+                 ;; [cheshire "5.5.0" :exclusions [*/*]]
                  ;; for gorilla websocket-relay
                  ;; jackson-core "2.5.3", alfresco jackson-core-2.3.2
-                 [com.fasterxml.jackson.dataformat/jackson-dataformat-smile "2.3.2"
-                  :exclusions [*/*]]
-                 [com.fasterxml.jackson.dataformat/jackson-dataformat-cbor "2.3.2"
-                  :exclusions [*/*]]
-                 [org.clojars.deas/gorilla-plot "0.2.0-SNAPSHOT"]
+                 #_[com.fasterxml.jackson.dataformat/jackson-dataformat-smile "2.3.2"
+                    :exclusions [*/*]]
+                 #_[com.fasterxml.jackson.dataformat/jackson-dataformat-cbor "2.3.2"
+                    :exclusions [*/*]]
+                 [org.clojars.deas/gorilla-plot "0.2.0"]
+                 [org.clojars.deas/gorilla-middleware "0.1.1"]
                  [clojail "1.0.6"]
+                 [ring-middleware-format "0.7.0"]
                  ;; TODO Untangle those two in gorilla-repl
                  [http-kit "2.2.0"]
                  [grimradical/clj-semver "0.3.0"
                   :exclusions [org.clojure/clojure]]
                  [ring-cors "0.1.8"]
-                 [ring-middleware-format "0.7.0"]]
+                 ;; Additional stuff for gorilla
+                 ;; incanter could add a whole lot of stuff for gorilla
+                 ;; [incanter/incanter-core "1.9.1"]
+                 ]
   :aot [gorilla-repl.servlet]
   ;; :aot [contentreich.ring-servlet]
   :javac-options ["-target" "1.7" "-source" "1.7"]
