@@ -77,7 +77,7 @@
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
                  [compojure "1.4.0"
                   :exclusions [ring/ring-core]]
-                 [org.clojars.deas/gorilla-repl-ng "0.3.6-SNAPSHOT"
+                 [org.clojars.deas/gorilla-repl-ng "0.3.6"
                   :exclusions [*/*]
                   #_[http-kit org.slf4j/slf4j-api
                      javax.servlet/servlet-api
@@ -96,7 +96,7 @@
                  #_[com.fasterxml.jackson.dataformat/jackson-dataformat-cbor "2.3.2"
                     :exclusions [*/*]]
                  [org.clojars.deas/gorilla-plot "0.2.0"]
-                 [org.clojars.deas/gorilla-middleware "0.1.1"]
+                 [org.clojars.deas/gorilla-middleware "0.1.2"]
                  [clojail "1.0.6"]
                  [ring-middleware-format "0.7.0"]
                  ;; TODO Untangle those two in gorilla-repl

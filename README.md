@@ -16,6 +16,7 @@ This library adds [Clojure](http://www.clojure.org/) support to the open source
    allowing for productive REPL-style experimentation and development within Alfresco
  * packages all of this, along with the Clojure runtime, into a **JAR** that 3rd party code can depend on (thereby avoiding
   conflicts between different Clojure extensions). This fork does **not** use AMP in any way.
+ * Bundle gorilla-repl
 
 ## Packaging
 It is this **JAR** artifact that should be deployed to a running
@@ -56,13 +57,18 @@ You may also query the status of the nREPL server via an HTTP GET:
     $ curl -u admin:admin http://localhost:8080/alfresco/service/clojure/nrepl
 ```
 
+Assuming you have it running on your local machine, you might want to visit
+ `http://localhost:8080/alfresco/gorilla-repl/worksheet.html#/edit?worksheet-filename=https://raw.githubusercontent.com/deas/lambdalf/sandbox/examples/alfresco-mimetypes.clj`
+to see an example of a lambdalf flavored worksheet. 
+ 
+
 ## Developing with lambdalf
 
 lambdalf is (NOT YET!) available as a Maven artifact from [Clojars](https://clojars.org/org.clojars.lambdalf/lambdalf).
 Plonk the following in your project.clj :plugins, `lein deps` and you should be good to go:
 
 ```clojure
-[org.clojars.lambdalf/lambdalf "#.#.#"]
+[org.clojars.deas/lambdalf "#.#.#"]
 ```
 
 Here's some sample code from an nREPL session connected to a running Alfresco repository. Note that there are
