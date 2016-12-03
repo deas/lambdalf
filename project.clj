@@ -34,7 +34,7 @@
 ;; (def websocket-version "1.0")
 
 
-(defproject org.clojars.deas/lambdalf "1.9.999"
+(defproject org.clojars.deas/lambdalf "1.10.0-SNAPSHOT"
   :title "lambdalf"
   :description "Lambdalf -- Clojure support for Alfresco, batteries included"
   :url "https://github.com/lambdalf/lambdalf"
@@ -98,6 +98,7 @@
                  [org.clojars.deas/gorilla-plot "0.2.0"]
                  [org.clojars.deas/gorilla-middleware "0.1.2"]
                  [clojail "1.0.6"]
+                 [com.cemerick/pomegranate "0.3.1"]
                  [ring-middleware-format "0.7.0"]
                  ;; TODO Untangle those two in gorilla-repl
                  [http-kit "2.2.0"]
